@@ -1,4 +1,4 @@
-# Fyr
+# Firesight
 
 <div align="center">
   <img src="assets/firesight_banner.png" alt="Firesight Logo" width="500"/>
