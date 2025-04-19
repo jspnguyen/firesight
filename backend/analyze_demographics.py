@@ -4,10 +4,14 @@ from pathlib import Path
 import PyPDF2
 import json
 import tiktoken
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize OpenAI client
 client = openai.OpenAI(
-    api_key="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"  # Replace with your OpenAI API key
+    api_key=os.getenv("OPENAI_API_KEY")  # Get API key from environment variable
 )
 
 def count_tokens(text):
@@ -180,7 +184,7 @@ def main():
         else:
             print(f"Failed to analyze {county_name}")
 
-    with open("result/demographic_results.json", "w") as f:
+    with open("backend/result/demographic_results.json", "w") as f:
         json.dump(results, f, indent=2)
 
 if __name__ == "__main__":

@@ -1,0 +1,82 @@
+{
+  "Yolo": {
+    "Total households": 76107,
+    "Population 65 and older": 28323,
+    "Population under 18": 44537,
+    "Average household size": 2.7,
+    "High school graduate percentage": 18.0,
+    "Total population": 217141,
+    "Percentage speaking English less than very well": 13.0,
+    "Percentage with broadband internet subscription": 91.0,
+    "Percentage who drove alone (car/truck/van)": 65.8,
+    "Median household income": 85097,
+    "Percentage with no health insurance coverage": 4.7,
+    "Percentage of all families below poverty line": 8.0,
+    "Top 3 race population percentages": {
+      "White": 58.8,
+      "Asian": 14.7,
+      "Some other race": 8.1
+    },
+    "Hispanic/Latino percentage": 32.2
+  },
+  "Shasta": {
+    "Total households": 71107,
+    "Population 65 and older": 38339,
+    "Population under 18": 39190,
+    "Average household size": 2.5,
+    "High school graduate percentage": null,
+    "Total population": 181852,
+    "Percentage speaking English less than very well": 2.5,
+    "Percentage with broadband internet subscription": 88.5,
+    "Percentage who drove alone (car/truck/van)": 78.6,
+    "Median household income": 68347,
+    "Percentage with no health insurance coverage": 6.6,
+    "Percentage of all families below poverty line": 8.2,
+    "Top 3 race population percentages": {
+      "White": 81.8,
+      "Asian": 3.1,
+      "American Indian and Alaska Native": 1.8
+    },
+    "Hispanic/Latino percentage": 11.0
+  },
+  "Los Angeles": {
+    "Total households": 3363093,
+    "Population 65 and older": 1415856,
+    "Population under 18": 2093072,
+    "Average household size": 2.9,
+    "High school graduate percentage": 20.4,
+    "Total population": 9936690,
+    "Percentage speaking English less than very well": 22.9,
+    "Percentage with broadband internet subscription": 90.2,
+    "Percentage who drove alone (car/truck/van)": 68.0,
+    "Median household income": 83411,
+    "Percentage with no health insurance coverage": 9.0,
+    "Percentage of all families below poverty line": 10.0,
+    "Top 3 race population percentages": {
+      "White": 39.6,
+      "Hispanic or Latino": 48.7,
+      "Asian": 14.8
+    },
+    "Hispanic/Latino percentage": 48.7
+  },
+  "Monterey": {
+    "Total households": 130973,
+    "Population 65 and older": 62481,
+    "Population under 18": 113042,
+    "Average household size": 3.2,
+    "High school graduate percentage": null,
+    "Total population": 437609,
+    "Percentage speaking English less than very well": 25.4,
+    "Percentage with broadband internet subscription": 91.8,
+    "Percentage who drove alone (car/truck/van)": 69.1,
+    "Median household income": 91043,
+    "Percentage with no health insurance coverage": 9.9,
+    "Percentage of all families below poverty line": 9.0,
+    "Top 3 race population percentages": {
+      "White": 39.7,
+      "Some other race": 39.9,
+      "Asian": 5.9
+    },
+    "Hispanic/Latino percentage": 59.9
+  }
+}
