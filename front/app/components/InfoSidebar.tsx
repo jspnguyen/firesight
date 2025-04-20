@@ -111,6 +111,7 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
   const [weatherLoading, setWeatherLoading] = useState(false)
   const [weatherError, setWeatherError] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [activeSuggestion, setActiveSuggestion] = useState<number | null>(null)
   const infoContentRef = useRef<HTMLDivElement>(null)
   
   // Check if the selected city is one of our predefined cities
@@ -550,6 +551,21 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
+
+        @keyframes highlightPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+          }
+        }
+
+        .suggestion-highlight {
+          animation: highlightPulse 2s infinite;
+          border-color: rgb(249, 115, 22) !important;
+          background: linear-gradient(to right, rgb(255, 247, 237), rgb(255, 237, 213)) !important;
+        }
       `}</style>
 
       {visible && (
@@ -642,7 +658,7 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                     <div className="space-y-3">
                       <h3 className="font-medium text-slate-700 flex items-center gap-2 mt-3">
                         <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-                        Top 3 Races
+                        Top 3 Ethnic Group by Population
                       </h3>
                       <div className="space-y-2">
                         {raceData?.map((race, index) => (
@@ -912,7 +928,9 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                           <div key={index}>
                             {visibleSuggestions.includes(index) ? (
                               <div 
-                                className="rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm transition-all duration-500 hover:shadow-md hover:border-orange-200 hover:from-orange-50 hover:to-white"
+                                className={`rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm transition-all duration-500 hover:shadow-md hover:border-orange-200 hover:from-orange-50 hover:to-white ${
+                                  activeSuggestion === index ? 'suggestion-highlight' : ''
+                                }`}
                                 style={{
                                   animation: 'slideIn 0.5s ease-out'
                                 }}
@@ -929,6 +947,7 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                                         size="sm" 
                                         className="h-8 px-4 bg-white hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors duration-300"
                                         onClick={() => {
+                                          setActiveSuggestion(index);
                                           if (onTakeAction && countyName) {
                                             console.log("Take Action clicked for county:", countyName);
                                             onTakeAction(countyName);
