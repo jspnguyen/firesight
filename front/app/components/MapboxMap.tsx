@@ -334,6 +334,9 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
   const [showScreenshotPopup, setShowScreenshotPopup] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
 
   // Initialize map
   useEffect(() => {
@@ -652,9 +655,46 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     setShowScreenshotPopup(false);
   };
   
-  // Function to handle email button click (placeholder for now)
+  // Function to handle email button click
   const handleEmailClick = () => {
-    // This would be implemented later
+    if (!screenshotUrl) return;
+    
+    // Show the email modal instead of using prompts
+    setShowEmailModal(true);
+  };
+
+  // Function to send the email
+  const sendEmail = () => {
+    if (!emailRecipient) return;
+    
+    // Create a subject line with the current date and selected city
+    const today = new Date().toISOString().slice(0, 10);
+    const subject = `Firesight Map Screenshot - ${selectedCity || "Location"} - ${today}`;
+    
+    // Create a body with information about the screenshot
+    let body = `Hello,\n\nI'm sharing a screenshot from the Firesight wildfire monitoring dashboard for ${selectedCity || "this location"}.\n\nThis screenshot was taken on ${today}.`;
+    
+    // Add the user's message if provided
+    if (emailMessage) {
+      body += `\n\nAdditional message: ${emailMessage}`;
+    }
+    
+    body += `\n\nBest regards,\nFiresight User`;
+    
+    // Encode the subject and body for the mailto link
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body);
+    
+    // Create the mailto link with the recipient
+    const mailtoLink = `mailto:${emailRecipient}?subject=${encodedSubject}&body=${encodedBody}`;
+    
+    // Open the default email client
+    window.open(mailtoLink, '_blank');
+    
+    // Reset form and close modals
+    setEmailRecipient('');
+    setEmailMessage('');
+    setShowEmailModal(false);
     setShowScreenshotPopup(false);
   };
 
@@ -946,6 +986,70 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
                 <Mail className="h-4 w-4" />
                 <span>Email</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Email Screenshot</h3>
+              <button 
+                onClick={() => setShowEmailModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Recipient Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                  placeholder="recipient@example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message (Optional)
+                </label>
+                <textarea
+                  id="message"
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  placeholder="Add a message to your email..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 mt-6">
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={sendEmail}
+                  disabled={!emailRecipient}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Send Email
+                </button>
+              </div>
             </div>
           </div>
         </div>
