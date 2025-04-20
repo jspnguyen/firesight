@@ -14,7 +14,9 @@ const cityToCountyMap = {
   "Yolo County, CA": "Yolo",
   "Los Angeles County, CA": "Los Angeles",
   "Monterey County, CA": "Monterey",
-  "Shasta County, CA": "Shasta"
+  "Shasta County, CA": "Shasta",
+  "Kern County, CA": "Kern",
+  "Riverside County, CA": "Riverside"
 }
 
 // Weather condition mapping based on temperature and precipitation
@@ -177,7 +179,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-sm font-medium text-slate-500">Limited English</h3>
-                        <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_limited_pct}%` : "N/A"}</p>
+                        <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_less_than_very_well_pct}%` : "N/A"}</p>
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-sm font-medium text-slate-500">Social Vulnerability</h3>

@@ -17,6 +17,8 @@ const CITY_COORDINATES = {
   "Los Angeles County, CA": { longitude: -118.2437, latitude: 34.0522, zoom: 10 },
   "Monterey County, CA": { longitude: -121.8947, latitude: 36.6005, zoom: 11 },
   "Shasta County, CA": { longitude: -122.3784, latitude: 40.5865, zoom: 10 },
+  "Kern County, CA": { longitude: -119.0195, latitude: 35.3434, zoom: 10 },
+  "Riverside County, CA": { longitude: -117.3874, latitude: 33.9534, zoom: 10 },
 } as const;
 
 // County FIPS codes for California
@@ -24,7 +26,9 @@ const COUNTY_FIPS = {
   "Yolo County, CA": "113",
   "Los Angeles County, CA": "037",
   "Monterey County, CA": "053",
-  "Shasta County, CA": "089"
+  "Shasta County, CA": "089",
+  "Kern County, CA": "029",
+  "Riverside County, CA": "065"
 } as const;
 
 // Calculate fire risk level based on weather and demographic data
@@ -117,6 +121,50 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
         [-121.8508, 35.9189], // Southwest
         [-121.9347, 36.3373], // West
         [-121.9073, 36.9107]  // Back to start
+      ]]
+    }
+  },
+  "Kern County, CA": {
+    type: "Feature",
+    properties: { name: "Kern County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-120.6736, 35.7875], // Northwest
+        [-120.1736, 35.7875], // North-Center
+        [-119.6736, 35.7875], // North
+        [-119.1736, 35.7875], // North-East
+        [-118.6736, 35.7875], // Northeast
+        [-118.6736, 35.2875], // East-North
+        [-118.6736, 34.7875], // East
+        [-119.1736, 34.7875], // East-South
+        [-119.6736, 34.7875], // Southeast
+        [-120.1736, 34.7875], // South-East
+        [-120.6736, 34.7875], // South
+        [-120.6736, 35.2875], // South-West
+        [-120.6736, 35.7875]  // Back to start
+      ]]
+    }
+  },
+  "Riverside County, CA": {
+    type: "Feature",
+    properties: { name: "Riverside County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-117.6736, 34.7875], // Northwest
+        [-117.1736, 34.7875], // North-Center
+        [-116.6736, 34.7875], // North
+        [-116.1736, 34.7875], // North-East
+        [-115.6736, 34.7875], // Northeast
+        [-115.6736, 34.2875], // East-North
+        [-115.6736, 33.7875], // East
+        [-116.1736, 33.7875], // East-South
+        [-116.6736, 33.7875], // Southeast
+        [-117.1736, 33.7875], // South-East
+        [-117.6736, 33.7875], // South
+        [-117.6736, 34.2875], // South-West
+        [-117.6736, 34.7875]  // Back to start
       ]]
     }
   }
@@ -223,6 +271,48 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
           [-121.45, 36.32],
           [-121.5, 36.35],
           [-121.5, 36.5]
+        ]]
+      }
+    }
+  ],
+  "Kern County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.92 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-119.5, 35.5],
+          [-119.45, 35.52],
+          [-119.4, 35.48],
+          [-119.35, 35.45],
+          [-119.3, 35.42],
+          [-119.35, 35.38],
+          [-119.4, 35.35],
+          [-119.45, 35.32],
+          [-119.5, 35.35],
+          [-119.5, 35.5]
+        ]]
+      }
+    }
+  ],
+  "Riverside County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.88 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-117.5, 34.5],
+          [-117.45, 34.52],
+          [-117.4, 34.48],
+          [-117.35, 34.45],
+          [-117.3, 34.42],
+          [-117.35, 34.38],
+          [-117.4, 34.35],
+          [-117.45, 34.32],
+          [-117.5, 34.35],
+          [-117.5, 34.5]
         ]]
       }
     }
