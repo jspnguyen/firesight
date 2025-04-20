@@ -108,8 +108,5 @@ firesight/
 - [Yolo](https://data.sacog.org/datasets/865c671f824b46548332ade360077141_1/about)
 - [Shasta](https://data-shasta.opendata.arcgis.com/datasets/a3af0c1268ca41ed86af626e0a22effb_7/explore?location=40.738145%2C-122.164438%2C9.42)
 
-## Contributing
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
