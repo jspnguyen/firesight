@@ -130,19 +130,15 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-120.6736, 35.7875], // Northwest
-        [-120.1736, 35.7875], // North-Center
-        [-119.6736, 35.7875], // North
-        [-119.1736, 35.7875], // North-East
-        [-118.6736, 35.7875], // Northeast
-        [-118.6736, 35.2875], // East-North
-        [-118.6736, 34.7875], // East
-        [-119.1736, 34.7875], // East-South
-        [-119.6736, 34.7875], // Southeast
-        [-120.1736, 34.7875], // South-East
-        [-120.6736, 34.7875], // South
-        [-120.6736, 35.2875], // South-West
-        [-120.6736, 35.7875]  // Back to start
+        [-119.9183, 35.7891], // Northwest
+        [-119.4424, 35.8998], // North
+        [-118.9307, 35.8834], // Northeast
+        [-118.7082, 35.5940], // East
+        [-118.4271, 35.2913], // Southeast
+        [-118.5183, 34.9766], // South
+        [-119.1681, 34.8385], // Southwest
+        [-119.6826, 35.0824], // West
+        [-119.9183, 35.7891]  // Back to start
       ]]
     }
   },
@@ -152,19 +148,21 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-117.6736, 34.7875], // Northwest
-        [-117.1736, 34.7875], // North-Center
-        [-116.6736, 34.7875], // North
-        [-116.1736, 34.7875], // North-East
-        [-115.6736, 34.7875], // Northeast
-        [-115.6736, 34.2875], // East-North
-        [-115.6736, 33.7875], // East
-        [-116.1736, 33.7875], // East-South
-        [-116.6736, 33.7875], // Southeast
-        [-117.1736, 33.7875], // South-East
-        [-117.6736, 33.7875], // South
-        [-117.6736, 34.2875], // South-West
-        [-117.6736, 34.7875]  // Back to start
+        [-117.5, 34.0], // Northwest near San Bernardino Forest
+        [-117.1, 34.1], // North near Big Bear
+        [-116.5, 34.1], // North central
+        [-115.5, 34.1], // Northeast near Joshua Tree
+        [-114.7, 34.3], // Far northeast at Colorado River
+        [-114.6, 34.1], // East at Colorado River
+        [-114.5, 33.8], // Southeast at Colorado River
+        [-114.7, 33.4], // Far southeast at Blythe
+        [-115.5, 33.2], // South near Salton Sea
+        [-116.1, 33.4], // South central
+        [-116.8, 33.4], // Southwest near mountains
+        [-117.2, 33.5], // Southwest near coast
+        [-117.5, 33.7], // West near Laguna Beach
+        [-117.6, 33.9], // Northwest near Anaheim
+        [-117.5, 34.0]  // Back to start
       ]]
     }
   }
@@ -303,16 +301,16 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
       geometry: {
         type: "Polygon" as const,
         coordinates: [[
-          [-117.5, 34.5],
-          [-117.45, 34.52],
-          [-117.4, 34.48],
-          [-117.35, 34.45],
-          [-117.3, 34.42],
-          [-117.35, 34.38],
-          [-117.4, 34.35],
-          [-117.45, 34.32],
-          [-117.5, 34.35],
-          [-117.5, 34.5]
+          [-117.0, 33.9],
+          [-116.95, 33.92],
+          [-116.9, 33.88],
+          [-116.85, 33.85],
+          [-116.8, 33.82],
+          [-116.85, 33.78],
+          [-116.9, 33.75],
+          [-116.95, 33.72],
+          [-117.0, 33.75],
+          [-117.0, 33.9]
         ]]
       }
     }
