@@ -345,6 +345,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [-119.4179, 36.7783], // California center
       zoom: 5.5, // Good zoom level to see all of California
+      preserveDrawingBuffer: true
     });
 
     // Add zoom controls to bottom right
@@ -611,7 +612,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       ctx.drawImage(mapCanvas, 0, 0);
       
       // Convert to data URL
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = map.current.getCanvas().toDataURL('image/png');
       
       // Check if the data URL is valid (not blank)
       if (dataUrl === 'data:,') {
