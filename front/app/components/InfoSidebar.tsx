@@ -738,7 +738,6 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                         {[
                           { label: "Health Insurance", value: countyData ? `${100 - countyData.no_health_ins_pct}%` : "N/A" },
                           { label: "Drove Alone", value: countyData ? `${countyData.drove_alone_pct}%` : "N/A" },
-                          { label: "High School Grad", value: countyData?.hs_grad_pct ? `${countyData.hs_grad_pct}%` : "N/A" },
                           { label: "Hispanic", value: countyData ? `${countyData.hispanic_pct}%` : "N/A" }
                         ].map((metric, index) => (
                           <div 
@@ -800,7 +799,7 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-white/80 text-sm">Last Updated</p>
+                    <p className="text-white/80 text-sm">Today's Date</p>
                     <p className="text-white font-medium">{weatherData?.date || 'N/A'}</p>
                   </div>
                 </div>

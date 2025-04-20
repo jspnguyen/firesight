@@ -820,7 +820,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
         .addTo(map.current!);
       
       const popup = new mapboxgl.Popup({ offset: 25 })
-        .setHTML(`<h3 class="text-sm font-semibold">Target ${index + 1}</h3>`);
+        .setHTML(`<h3 class="text-sm font-semibold">Location ${index + 1}</h3>`);
       
       marker.setPopup(popup);
       targetMarkersRef.current.push(marker); // Add to target markers ref instead
