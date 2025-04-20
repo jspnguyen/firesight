@@ -304,10 +304,13 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
       addText(`Homeless Population: ${countyData.total_homeless.toLocaleString()}`);
       yPosition += lineHeight;
       
-      // Add additional metrics
-      addText('Additional Metrics', 16, true);
+      // Add demographic metrics
+      addText('Demographic Metrics', 16, true);
+      addText(`Elder Population (65+): ${countyData.pop_65_plus.toLocaleString()} (${((countyData.pop_65_plus / countyData.total_pop) * 100).toFixed(1)}%)`);
+      addText(`Broadband Access: ${countyData.broadband_pct}%`);
       addText(`Limited English Proficiency: ${countyData.eng_less_than_very_well_pct}%`);
       addText(`Social Vulnerability Index: ${countyData.svi.toFixed(2)}`);
+      yPosition += lineHeight;
       
       // Add weather data if available
       if (weatherData) {
@@ -687,6 +690,44 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                       ))}
                     </div>
 
+                    {/* Demographic Metrics */}
+                    <div className="space-y-3">
+                      <h3 className="font-medium text-slate-700 flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                        Demographic Metrics
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { 
+                            label: "Elder Population (65+)", 
+                            value: countyData ? `${countyData.pop_65_plus.toLocaleString()} (${((countyData.pop_65_plus / countyData.total_pop) * 100).toFixed(1)}%)` : "N/A" 
+                          },
+                          { 
+                            label: "Broadband Access", 
+                            value: countyData ? `${countyData.broadband_pct}%` : "N/A" 
+                          },
+                          { 
+                            label: "Limited English", 
+                            value: countyData ? `${countyData.eng_less_than_very_well_pct}%` : "N/A" 
+                          },
+                          { 
+                            label: "Social Vulnerability", 
+                            value: countyData ? countyData.svi.toFixed(2) : "N/A" 
+                          }
+                        ].map((metric, index) => (
+                          <div 
+                            key={index}
+                            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-slate-50 to-white p-3 shadow-sm transition-all duration-300 hover:shadow-md hover:from-orange-50 hover:to-white"
+                          >
+                            <h3 className="text-sm font-medium text-slate-500">{metric.label}</h3>
+                            <p className="mt-1 text-lg font-semibold text-slate-800">
+                              {metric.value}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Additional Metrics */}
                     <div className="space-y-3">
                       <h3 className="font-medium text-slate-700 flex items-center gap-2">
@@ -695,8 +736,10 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
                         {[
-                          { label: "Limited English", value: countyData ? `${countyData.eng_less_than_very_well_pct}%` : "N/A" },
-                          { label: "Social Vulnerability", value: countyData ? countyData.svi.toFixed(2) : "N/A" }
+                          { label: "Health Insurance", value: countyData ? `${100 - countyData.no_health_ins_pct}%` : "N/A" },
+                          { label: "Drove Alone", value: countyData ? `${countyData.drove_alone_pct}%` : "N/A" },
+                          { label: "High School Grad", value: countyData?.hs_grad_pct ? `${countyData.hs_grad_pct}%` : "N/A" },
+                          { label: "Hispanic", value: countyData ? `${countyData.hispanic_pct}%` : "N/A" }
                         ].map((metric, index) => (
                           <div 
                             key={index}
