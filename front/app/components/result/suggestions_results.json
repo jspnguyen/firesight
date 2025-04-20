@@ -1,48 +1,55 @@
 {
     "Yolo": [
+        "Establish multilingual emergency alerts",
+        "Boost broadband infrastructure",
+        "Expand youth fire safety education",
+        "Fund low-income outreach programs",
+        "Enhance senior citizen evacuation plans"
+    ],
+    "Riverside": [
         "Increase broadband access",
-        "Enhance elderly healthcare services",
-        "Improve child crisis services",
-        "Boost health insurance coverage",
-        "Expand Asian language resources",
-        "Increase poverty alleviation programs",
-        "Enhance hispanic community engagement",
-        "Offer driver safety programs",
-        "Raise high school graduation rates"
+        "Fund elderly support services",
+        "Expand youth disaster education",
+        "Increase Spanish language resources",
+        "Boost healthcare accessibility",
+        "Enhance poverty alleviation programs",
+        "Incentivize larger household disaster preparedness",
+        "Promote insurance coverage"
+    ],
+    "Kern": [
+        "Focus more on community outreach of programs",
+        "Expand senior citizen healthcare services",
+        "Increase youth fire safety education",
+        "Improve broadband infrastructure",
+        "Launch Social Vulnerability Index improvement plan"
     ],
     "Shasta": [
-        "Increase elderly care facilities",
-        "Boost rural broadband access",
-        "Expand youth disaster education",
-        "Ensure Indigenous language emergency alerts",
-        "Improve access to health insurance",
-        "Address poverty in disaster recovery",
-        "Add Asian language translators",
-        "Increase disaster support for low-income households",
-        "Enhance solitary driver alert systems",
-        "Ensure Spanish language emergency alerts",
-        "Prioritize SVI in recovery strategies"
+        "Expand youth fire safety education",
+        "Improve broadband connectivity",
+        "Boost healthcare coverage",
+        "Invest in poverty alleviation programs",
+        "Enhance multilingual emergency services",
+        "Establish SVI-based disaster response plan",
+        "Improve Hispanic community outreach",
+        "Increase support for Native American communities"
     ],
     "Los Angeles": [
-        "Increase elderly support services",
-        "Boost youth disaster education programs",
-        "Invest in Spanish language resources",
-        "Enhance broadband connectivity",
-        "Promote carpooling during evacuations",
-        "Improve access to healthcare",
-        "Expand poverty alleviation programs",
-        "Promote multilingual disaster awareness",
-        "Prioritize areas with high SVI"
+        "Boost elderly disaster preparedness education",
+        "Increase funding for child emergency services",
+        "Enhance broadband infrastructure in vulnerable areas",
+        "Improve public transportation for evacuation",
+        "Fund health insurance enrollment outreach",
+        "Enhance language services for Hispanic community",
+        "Address social vulnerability in disaster planning",
+        "Ensure Asian community disaster response inclusivity"
     ],
     "Monterey": [
-        "Increase elderly care facilities",
-        "Boost child disaster education programs",
-        "Improve broadband connectivity",
-        "Promote carpooling initiatives",
-        "Raise health insurance awareness",
-        "Amplify poverty alleviation programs",
-        "Enhance multilingual emergency communication",
-        "Enhance support for non-English speakers",
-        "Address high SVI with targeted aid"
+        "Establish youth-oriented disaster education",
+        "Improve broadband infrastructure",
+        "Increase public transportation evacuation options",
+        "Implement poverty alleviation initiatives",
+        "Enhance Asian community outreach",
+        "Prioritize Hispanic community disaster response",
+        "Improve SVI through targeted programs"
     ]
 }

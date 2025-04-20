@@ -54,22 +54,22 @@ def generate_suggestions(data: Dict, county: str = None) -> List[str]:
     county_text = f" for {county} County" if county else ""
     
     prompt = f"""Based on the following demographic data{county_text}, provide specific, actionable suggestions 
-    for how the state can create analytics opportunities and solutions to support data-driven, 
+    for how the state government can create analytics opportunities and solutions to support data-driven, 
     culturally and demographically sensitive fire recovery, response, and survivor support. SVI is the Social Vulnerability Index.
     
-    Each suggestion MUST be under 7 words and should be a simple, actionable recommendation.
+    Each suggestion MUST be under 7 words and should be a simple, actionable recommendation that ONLY the government can implement.
     Examples of good suggestions:
-    - "Ensure enough Spanish translators"
-    - "Increase firefighter staffing levels"
-    - "Add mobile clinics in rural areas"
-    - "Provide multilingual emergency alerts"
-    - "Expand elderly evacuation assistance"
+    - "Fund Spanish translator program"
+    - "Increase firefighter department budget"
+    - "Establish mobile clinic program"
+    - "Implement multilingual alert system"
+    - "Create elderly evacuation program"
 
     Data:
     {analysis}
 
     Please provide ONLY short, simple suggestions that address the unique demographic challenges shown in the data.
-    Each suggestion must be under 7 words.
+    Each suggestion must be under 7 words and must be something that ONLY the government can implement.
     Return ONLY the list of suggestions in Python list format, with each suggestion as a string."""
 
     response = client.chat.completions.create(
