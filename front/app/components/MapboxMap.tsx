@@ -326,6 +326,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
   const map = useRef<mapboxgl.Map | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const targetMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -438,7 +439,9 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
 
     return () => {
       markersRef.current.forEach(marker => marker.remove());
+      targetMarkersRef.current.forEach(marker => marker.remove());
       markersRef.current = [];
+      targetMarkersRef.current = [];
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -458,6 +461,10 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     if (onCitySelect) {
       onCitySelect(cityName);
     }
+
+    // Clear any existing target markers
+    targetMarkersRef.current.forEach(marker => marker.remove());
+    targetMarkersRef.current = [];
 
     // Show the layers only for the selected county
     map.current.setLayoutProperty('county-boundaries', 'visibility', 'visible');
@@ -746,10 +753,10 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     
     console.log("County feature found:", countyFeature);
     
-    // Clear existing target markers
-    console.log("Clearing existing markers:", markersRef.current.length);
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    // Clear existing target markers only
+    console.log("Clearing existing target markers:", targetMarkersRef.current.length);
+    targetMarkersRef.current.forEach(marker => marker.remove());
+    targetMarkersRef.current = [];
     
     // Generate 4-8 random points within the county
     const numTargets = Math.floor(Math.random() * 5) + 4; // Random number between 4 and 8
@@ -776,7 +783,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
         .setHTML(`<h3 class="text-sm font-semibold">Target ${index + 1}</h3>`);
       
       marker.setPopup(popup);
-      markersRef.current.push(marker);
+      targetMarkersRef.current.push(marker); // Add to target markers ref instead
     });
     
     // Zoom to the county
