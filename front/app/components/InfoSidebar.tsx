@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Info, Cloud, Lightbulb, ChevronRight, Loader2 } from "lucide-react"
+import { Info, Cloud, Lightbulb, ChevronRight, Loader2, Sun, CloudSun, Moon, CloudRain, CloudSnow, CloudLightning, Wind as WindIcon, Droplets, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import demographicData from "./result/demographic_results.json"
 import suggestionsData from "./result/suggestions_results.json"
+import { motion } from "framer-motion"
 
 // Map of cities to their corresponding counties
 const cityToCountyMap = {
@@ -20,13 +21,16 @@ const cityToCountyMap = {
 
 // Weather condition mapping based on temperature and precipitation
 const getWeatherCondition = (temp: number, precip: number) => {
-  if (precip > 0) return "Rainy"
-  if (temp > 25) return "Hot"
-  if (temp > 20) return "Sunny"
-  if (temp > 15) return "Partly Cloudy"
-  if (temp > 10) return "Cloudy"
-  return "Cold"
-}
+  if (precip > 0) {
+    if (temp < 0) return "Snowy";
+    return "Rainy";
+  }
+  if (temp > 25) return "Sunny";
+  if (temp > 20) return "Partly Cloudy";
+  if (temp > 15) return "Cloudy";
+  if (temp > 10) return "Mostly Cloudy";
+  return "Cold";
+};
 
 // Default suggestions in case the county data is not available
 const defaultSuggestions = [
@@ -65,6 +69,31 @@ const formatTemperature = (temp: number | null | undefined): string => {
     return "N/A";
   }
   return `${Math.round(temp)}°C`;
+};
+
+// Add a function to get the appropriate weather icon
+const getWeatherIcon = (condition: string, size = 24) => {
+  const iconProps = {
+    size,
+    strokeWidth: 1.5,
+    className: "weather-icon",
+  };
+
+  switch (condition.toLowerCase()) {
+    case "sunny":
+      return <Sun {...iconProps} className="weather-icon sunny" />;
+    case "partly cloudy":
+      return <CloudSun {...iconProps} className="weather-icon cloudy" />;
+    case "cloudy":
+    case "mostly cloudy":
+      return <Cloud {...iconProps} className="weather-icon cloudy" />;
+    case "rainy":
+      return <CloudRain {...iconProps} className="weather-icon rainy" />;
+    case "snowy":
+      return <CloudSnow {...iconProps} className="weather-icon snowy" />;
+    default:
+      return <Cloud {...iconProps} className="weather-icon cloudy" />;
+  }
 };
 
 export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
@@ -271,8 +300,171 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
             animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
           }
         }
+
+        @keyframes sunPulse {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+          }
+          50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.6);
+          }
+        }
+
+        @keyframes cloudFloat {
+          0%, 100% {
+            transform: translateX(0) translateY(0);
+          }
+          25% {
+            transform: translateX(-5px) translateY(-2px);
+          }
+          75% {
+            transform: translateX(5px) translateY(2px);
+          }
+        }
+
+        @keyframes rainDrop {
+          0% {
+            transform: translateY(-10px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(10px);
+            opacity: 1;
+          }
+        }
+
+        @keyframes snowFall {
+          0% {
+            transform: translateY(-10px) rotate(0deg);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(10px) rotate(360deg);
+            opacity: 1;
+          }
+        }
+
         .animate-bounce {
           animation: bounce 2s infinite;
+        }
+
+        .weather-icon {
+          transition: all 0.3s ease;
+        }
+
+        .weather-icon.sunny {
+          animation: sunPulse 3s infinite;
+          color: #f97316;
+        }
+
+        .weather-icon.cloudy {
+          animation: cloudFloat 4s infinite;
+          color: #64748b;
+        }
+
+        .weather-icon.rainy {
+          animation: cloudFloat 4s infinite;
+          color: #475569;
+        }
+
+        .weather-icon.snowy {
+          animation: cloudFloat 4s infinite;
+          color: #94a3b8;
+        }
+
+        .rain-drops {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+
+        .rain-drop {
+          position: absolute;
+          width: 2px;
+          height: 10px;
+          background: #60a5fa;
+          animation: rainDrop 1s infinite;
+        }
+
+        .snow-flake {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #f8fafc;
+          border-radius: 50%;
+          animation: snowFall 2s infinite;
+        }
+
+        .glass-card {
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .weather-display {
+          background: linear-gradient(135deg, #6ea5ff 0%, #ffa071 100%);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .weather-display::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 80%);
+          pointer-events: none;
+        }
+
+        .floating-particles {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+
+        .particle {
+          position: absolute;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+          0% {
+            transform: translateY(0) rotate(0deg);
+          }
+          100% {
+            transform: translateY(-100vh) rotate(360deg);
+          }
+        }
+
+        .temp-value {
+          background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card {
+          transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+          background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
       `}</style>
 
@@ -424,85 +616,134 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
 
           <TabsContent 
             value="weather" 
-            className="mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+            className="mt-0 transform transition-all duration-300"
           >
-            <Card className="border-1 shadow-lg">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="rounded-full bg-gradient-to-r from-orange-50 to-amber-50 p-2">
-                    <Cloud className="h-5 w-5 text-orange-500" />
-                  </div>
-                  <span>Current Weather</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!isKnownCity ? renderNoDataMessage() : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {weatherLoading ? (
-                      <div className="col-span-2 flex items-center justify-center p-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-                      </div>
-                    ) : weatherError ? (
-                      <div className="col-span-2 text-center text-red-500 p-4">
-                        {weatherError}
-                      </div>
-                    ) : weatherData ? (
-                      <>
-                        <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
-                          <div className="flex flex-col items-center">
-                            <Cloud className="h-12 w-12 text-slate-600" />
-                            <div className="mt-2 flex flex-col items-center">
-                              <span className="text-4xl font-bold">
-                                {formatTemperature(weatherData.current_temp)}
-                              </span>
-                              {weatherData.feels_like !== null && (
-                                <span className="text-sm text-slate-500">
-                                  Feels like {formatTemperature(weatherData.feels_like)}
-                                </span>
-                              )}
-                            </div>
-                            <span className="mt-1 text-sm text-slate-500">
-                              {getWeatherCondition(weatherData.current_temp || weatherData.t_max, weatherData.precip)}
-                            </span>
-                          </div>
-                        </div>
+            <div className="weather-display rounded-2xl p-6 relative min-h-[500px]">
+              {/* Floating Particles Background */}
+              <div className="floating-particles">
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="particle"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      width: `${Math.random() * 10 + 5}px`,
+                      height: `${Math.random() * 10 + 5}px`,
+                      animationDelay: `${Math.random() * 20}s`,
+                      opacity: Math.random() * 0.5,
+                    }}
+                  />
+                ))}
+              </div>
 
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">High</h3>
-                          <p className="font-medium text-slate-800">{formatTemperature(weatherData.t_max)}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Low</h3>
-                          <p className="font-medium text-slate-800">{formatTemperature(weatherData.t_min)}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
-                          <p className="font-medium text-slate-800">
-                            {weatherData.humidity !== null ? `${Math.round(weatherData.humidity)}%` : "N/A"}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                          <p className="font-medium text-slate-800">{`${weatherData.wind_max} km/h`}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                          <p className="font-medium text-slate-800">{`${weatherData.gust_max} km/h`}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
-                          <p className="font-medium text-slate-800">{`${weatherData.precip} mm`}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-slate-500">Date</h3>
-                          <p className="font-medium text-slate-800">{weatherData.date}</p>
-                        </div>
-                      </>
-                    ) : null}
+              {/* Main Content */}
+              <div className="relative z-10">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                      className="rounded-full bg-white/30 p-3 backdrop-blur-md"
+                    >
+                      {getWeatherIcon(getWeatherCondition(weatherData?.current_temp || 0, weatherData?.precip || 0), 32)}
+                    </motion.div>
+                    <div>
+                      <h2 className="text-white text-2xl font-semibold">Current Weather</h2>
+                      <p className="text-white/80">{selectedCity}</p>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="text-right">
+                    <p className="text-white/80 text-sm">Last Updated</p>
+                    <p className="text-white font-medium">{weatherData?.date || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {/* Main Temperature Display */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="glass-card rounded-3xl p-8 mb-8 flex items-center justify-between"
+                >
+                  <div>
+                    <div className="flex items-end gap-4">
+                      <h1 className="temp-value text-7xl font-bold">
+                        {formatTemperature(weatherData?.current_temp).replace('°C', '')}°
+                      </h1>
+                      <span className="text-4xl font-light text-slate-600 mb-2">C</span>
+                    </div>
+                    <p className="text-xl text-slate-600 mt-2">
+                      {getWeatherCondition(weatherData?.current_temp || 0, weatherData?.precip || 0)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-slate-500">Feels like</p>
+                    <p className="text-3xl font-semibold text-slate-700">
+                      {formatTemperature(weatherData?.feels_like)}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    {
+                      label: "High",
+                      value: formatTemperature(weatherData?.t_max),
+                      icon: <ArrowUp className="text-red-500" />,
+                      color: "from-red-500/10 to-orange-500/10"
+                    },
+                    {
+                      label: "Low",
+                      value: formatTemperature(weatherData?.t_min),
+                      icon: <ArrowDown className="text-blue-500" />,
+                      color: "from-blue-500/10 to-cyan-500/10"
+                    },
+                    {
+                      label: "Humidity",
+                      value: `${Math.round(weatherData?.humidity || 0)}%`,
+                      icon: <Droplets className="text-sky-500" />,
+                      color: "from-sky-500/10 to-blue-500/10"
+                    },
+                    {
+                      label: "Wind",
+                      value: `${weatherData?.wind_max || 0} km/h`,
+                      icon: <WindIcon className="text-teal-500" />,
+                      color: "from-teal-500/10 to-green-500/10"
+                    },
+                    {
+                      label: "Gust",
+                      value: `${weatherData?.gust_max || 0} km/h`,
+                      icon: <WindIcon className="text-emerald-500" />,
+                      color: "from-emerald-500/10 to-teal-500/10"
+                    },
+                    {
+                      label: "Precip.",
+                      value: `${weatherData?.precip || 0} mm`,
+                      icon: <span className="text-xl">🌧️</span>,
+                      color: "from-indigo-500/10 to-purple-500/10",
+                      className: "text-[0.95rem]"
+                    }
+                  ].map((metric, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
+                      className={`metric-card glass-card rounded-2xl p-4 bg-gradient-to-br ${metric.color}`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        {metric.icon}
+                        <span className={`text-slate-600 font-medium ${metric.className || ''}`}>{metric.label}</span>
+                      </div>
+                      <p className="metric-value text-2xl font-bold">{metric.value}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent 
