@@ -76,6 +76,8 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     
     const coords = CITY_COORDINATES[cityName];
     setSelectedCity(cityName);
+    setShowInfoSidebar(true);
+    setIsCollapsed(true);
     
     if (onCitySelect) {
       onCitySelect(cityName);
