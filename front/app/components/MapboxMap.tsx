@@ -651,6 +651,149 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     setShowScreenshotPopup(false);
   };
 
+  // Function to generate a random point within a polygon
+  const generateRandomPointInPolygon = (polygon: Feature<Polygon>): [number, number] => {
+    console.log("Generating random point in polygon:", polygon);
+    
+    const coordinates = polygon.geometry.coordinates[0]; // Get the first ring of the polygon
+    console.log("Polygon coordinates:", coordinates);
+    
+    const bounds = {
+      minLng: Math.min(...coordinates.map(coord => coord[0])),
+      maxLng: Math.max(...coordinates.map(coord => coord[0])),
+      minLat: Math.min(...coordinates.map(coord => coord[1])),
+      maxLat: Math.max(...coordinates.map(coord => coord[1]))
+    };
+    
+    console.log("Polygon bounds:", bounds);
+    
+    // Generate a random point within the bounding box
+    let point: [number, number] = [0, 0]; // Initialize with default values
+    let isInside = false;
+    let attempts = 0;
+    const maxAttempts = 100; // Prevent infinite loops
+    
+    // Keep generating points until we find one inside the polygon
+    while (!isInside && attempts < maxAttempts) {
+      const lng = bounds.minLng + Math.random() * (bounds.maxLng - bounds.minLng);
+      const lat = bounds.minLat + Math.random() * (bounds.maxLat - bounds.minLat);
+      point = [lng, lat];
+      
+      // Check if the point is inside the polygon using ray casting algorithm
+      isInside = isPointInPolygon(point, coordinates);
+      attempts++;
+    }
+    
+    if (!isInside) {
+      console.warn("Failed to generate a point inside the polygon after", maxAttempts, "attempts. Using center point.");
+      // Use the center of the bounding box as a fallback
+      point = [
+        (bounds.minLng + bounds.maxLng) / 2,
+        (bounds.minLat + bounds.maxLat) / 2
+      ];
+    }
+    
+    console.log("Generated point:", point);
+    return point;
+  };
+
+  // Ray casting algorithm to check if a point is inside a polygon
+  const isPointInPolygon = (point: [number, number], polygon: number[][]): boolean => {
+    const [x, y] = point;
+    let inside = false;
+    
+    // Make sure we have a valid polygon
+    if (!polygon || polygon.length < 3) {
+      console.error("Invalid polygon:", polygon);
+      return false;
+    }
+    
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
+      
+      // Check if the point is on the edge of the polygon
+      if ((yi === y && yj === y) && ((x >= xi && x <= xj) || (x >= xj && x <= xi))) {
+        return true;
+      }
+      
+      const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    
+    return inside;
+  };
+
+  // Function to add random targets within a county
+  const addRandomTargets = (countyName: string) => {
+    console.log("addRandomTargets called with county:", countyName);
+    
+    if (!map.current) {
+      console.error("Map is not initialized");
+      return;
+    }
+    
+    // Convert county name to the format used in COUNTY_BOUNDARIES
+    const formattedCountyName = `${countyName} County, CA`;
+    console.log("Looking for county with name:", formattedCountyName);
+    
+    // Get the county feature
+    const countyFeature = COUNTY_BOUNDARIES[formattedCountyName as keyof typeof COUNTY_BOUNDARIES];
+    if (!countyFeature) {
+      console.error("County feature not found for:", formattedCountyName);
+      return;
+    }
+    
+    console.log("County feature found:", countyFeature);
+    
+    // Clear existing target markers
+    console.log("Clearing existing markers:", markersRef.current.length);
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+    
+    // Generate 4-8 random points within the county
+    const numTargets = Math.floor(Math.random() * 5) + 4; // Random number between 4 and 8
+    console.log("Generating", numTargets, "targets");
+    const targets: [number, number][] = [];
+    
+    for (let i = 0; i < numTargets; i++) {
+      const point = generateRandomPointInPolygon(countyFeature);
+      targets.push(point);
+      console.log("Generated target", i+1, "at:", point);
+    }
+    
+    // Add markers for each target
+    targets.forEach((point, index) => {
+      console.log("Adding marker for target", index+1, "at:", point);
+      const marker = new mapboxgl.Marker({
+        color: '#FF4500', // Orange-red color
+        scale: 0.8
+      })
+        .setLngLat(point)
+        .addTo(map.current!);
+      
+      const popup = new mapboxgl.Popup({ offset: 25 })
+        .setHTML(`<h3 class="text-sm font-semibold">Target ${index + 1}</h3>`);
+      
+      marker.setPopup(popup);
+      markersRef.current.push(marker);
+    });
+    
+    // Zoom to the county
+    const coords = CITY_COORDINATES[formattedCountyName as keyof typeof CITY_COORDINATES];
+    if (coords) {
+      console.log("Zooming to county at:", coords);
+      map.current.flyTo({
+        center: [coords.longitude, coords.latitude],
+        zoom: coords.zoom,
+        duration: 2000,
+        essential: true
+      });
+    } else {
+      console.error("Coordinates not found for county:", formattedCountyName);
+    }
+  };
+
   return (
     <div className="relative w-full h-full">
       <div className="absolute top-4 left-4 z-10">
@@ -749,7 +892,11 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute right-0 top-0 h-full">
-        <InfoSidebar selectedCity={selectedCity || "Location"} visible={showInfoSidebar} />
+        <InfoSidebar 
+          selectedCity={selectedCity || "Location"} 
+          visible={showInfoSidebar} 
+          onTakeAction={addRandomTargets}
+        />
       </div>
 
       {/* Screenshot Popup */}

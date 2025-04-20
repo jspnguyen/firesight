@@ -44,6 +44,7 @@ const defaultSuggestions = [
 interface InfoSidebarProps {
   selectedCity: string | null;
   visible: boolean;
+  onTakeAction?: (countyName: string) => void;
 }
 
 interface RaceData {
@@ -96,7 +97,7 @@ const getWeatherIcon = (condition: string, size = 24) => {
   }
 };
 
-export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
+export default function InfoSidebar({ selectedCity, visible = false, onTakeAction }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [visibleSuggestions, setVisibleSuggestions] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -785,6 +786,14 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                                         variant="outline" 
                                         size="sm" 
                                         className="h-8 px-4 bg-white hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors duration-300"
+                                        onClick={() => {
+                                          if (onTakeAction && countyName) {
+                                            console.log("Take Action clicked for county:", countyName);
+                                            onTakeAction(countyName);
+                                          } else {
+                                            console.log("Take Action clicked but onTakeAction or countyName is missing", { onTakeAction, countyName });
+                                          }
+                                        }}
                                       >
                                         Take Action
                                       </Button>
