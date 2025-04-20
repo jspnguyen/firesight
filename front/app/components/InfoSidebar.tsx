@@ -12,7 +12,6 @@ import suggestionsData from "./result/suggestions_results.json"
 // Map of cities to their corresponding counties
 const cityToCountyMap = {
   "Yolo County, CA": "Yolo",
-  "Santa Clara County, CA": "Santa Clara", // Note: Santa Clara is not in our JSON, will need to handle this
   "Los Angeles County, CA": "Los Angeles",
   "Monterey County, CA": "Monterey",
   "Shasta County, CA": "Shasta"
@@ -81,7 +80,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   const renderNoDataMessage = () => (
     <div className="p-4 text-center text-slate-500">
       <p className="text-lg font-medium">Data not available</p>
-      <p className="mt-2 text-sm">We currently only have data for Yolo County, Santa Clara County, Los Angeles County, Monterey County, and Shasta County.</p>
+      <p className="mt-2 text-sm">We currently only have data for Yolo County, Los Angeles County, Monterey County, and Shasta County.</p>
     </div>
   );
 

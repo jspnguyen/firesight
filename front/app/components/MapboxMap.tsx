@@ -7,13 +7,13 @@ import InfoSidebar from './InfoSidebar';
 import type { Feature, Polygon } from 'geojson';
 import weatherData from './result/weather_results.json';
 import demographicData from './result/demographic_results.json';
+import { Camera, X, Save, Mail } from 'lucide-react';
 
 // Initialize Mapbox
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const CITY_COORDINATES = {
   "Yolo County, CA": { longitude: -121.7405, latitude: 38.5449, zoom: 11 },
-  "Santa Clara County, CA": { longitude: -121.8863, latitude: 37.3382, zoom: 11 },
   "Los Angeles County, CA": { longitude: -118.2437, latitude: 34.0522, zoom: 10 },
   "Monterey County, CA": { longitude: -121.8947, latitude: 36.6005, zoom: 11 },
   "Shasta County, CA": { longitude: -122.3784, latitude: 40.5865, zoom: 10 },
@@ -22,7 +22,6 @@ const CITY_COORDINATES = {
 // County FIPS codes for California
 const COUNTY_FIPS = {
   "Yolo County, CA": "113",
-  "Santa Clara County, CA": "085",
   "Los Angeles County, CA": "037",
   "Monterey County, CA": "053",
   "Shasta County, CA": "089"
@@ -120,24 +119,6 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
         [-121.9073, 36.9107]  // Back to start
       ]]
     }
-  },
-  "Santa Clara County, CA": {
-    type: "Feature",
-    properties: { name: "Santa Clara County" },
-    geometry: {
-      type: "Polygon",
-      coordinates: [[
-        [-122.2026, 37.4834], // Northwest
-        [-121.8398, 37.4889], // North
-        [-121.2144, 37.4725], // Northeast
-        [-121.2034, 37.1339], // East
-        [-121.4692, 36.9946], // Southeast
-        [-121.8398, 36.9946], // South
-        [-122.0460, 37.1339], // Southwest
-        [-122.2026, 37.2732], // West
-        [-122.2026, 37.4834]  // Back to start
-      ]]
-    }
   }
 };
 
@@ -150,11 +131,16 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
       geometry: {
         type: "Polygon" as const,
         coordinates: [[
-          [-122.5, 40.8], // Northwest corner
-          [-122.3, 40.8], // Northeast corner
-          [-122.3, 40.6], // Southeast corner
-          [-122.5, 40.6], // Southwest corner
-          [-122.5, 40.8]  // Close the polygon
+          [-122.5, 40.8],
+          [-122.4, 40.85],
+          [-122.3, 40.82],
+          [-122.25, 40.78],
+          [-122.3, 40.75],
+          [-122.35, 40.72],
+          [-122.4, 40.65],
+          [-122.45, 40.68],
+          [-122.5, 40.75],
+          [-122.5, 40.8]
         ]]
       }
     },
@@ -165,9 +151,14 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
         type: "Polygon" as const,
         coordinates: [[
           [-122.0, 40.7],
-          [-121.8, 40.7],
-          [-121.8, 40.5],
-          [-122.0, 40.5],
+          [-121.95, 40.72],
+          [-121.9, 40.68],
+          [-121.85, 40.65],
+          [-121.8, 40.62],
+          [-121.85, 40.58],
+          [-121.9, 40.55],
+          [-121.95, 40.52],
+          [-122.0, 40.55],
           [-122.0, 40.7]
         ]]
       }
@@ -181,9 +172,14 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
         type: "Polygon" as const,
         coordinates: [[
           [-118.5, 34.5],
-          [-118.3, 34.5],
-          [-118.3, 34.3],
-          [-118.5, 34.3],
+          [-118.45, 34.52],
+          [-118.4, 34.48],
+          [-118.35, 34.45],
+          [-118.3, 34.42],
+          [-118.35, 34.38],
+          [-118.4, 34.35],
+          [-118.45, 34.32],
+          [-118.5, 34.35],
           [-118.5, 34.5]
         ]]
       }
@@ -197,9 +193,14 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
         type: "Polygon" as const,
         coordinates: [[
           [-121.9, 38.7],
-          [-121.7, 38.7],
-          [-121.7, 38.5],
-          [-121.9, 38.5],
+          [-121.85, 38.72],
+          [-121.8, 38.68],
+          [-121.75, 38.65],
+          [-121.7, 38.62],
+          [-121.75, 38.58],
+          [-121.8, 38.55],
+          [-121.85, 38.52],
+          [-121.9, 38.55],
           [-121.9, 38.7]
         ]]
       }
@@ -213,9 +214,14 @@ const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
         type: "Polygon" as const,
         coordinates: [[
           [-121.5, 36.5],
-          [-121.3, 36.5],
-          [-121.3, 36.3],
-          [-121.5, 36.3],
+          [-121.45, 36.52],
+          [-121.4, 36.48],
+          [-121.35, 36.45],
+          [-121.3, 36.42],
+          [-121.35, 36.38],
+          [-121.4, 36.35],
+          [-121.45, 36.32],
+          [-121.5, 36.35],
           [-121.5, 36.5]
         ]]
       }
@@ -236,6 +242,9 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [showInfoSidebar, setShowInfoSidebar] = useState(false);
+  const [showScreenshotPopup, setShowScreenshotPopup] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
 
   // Initialize map
   useEffect(() => {
@@ -478,6 +487,81 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     }
   };
 
+  // Function to take a screenshot of the map
+  const takeScreenshot = async () => {
+    if (!map.current) return;
+    
+    setIsCapturingScreenshot(true);
+    
+    try {
+      // Wait for the map to be fully rendered
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Force the map to render a frame
+      map.current.triggerRepaint();
+      
+      // Get the map canvas
+      const mapCanvas = map.current.getCanvas();
+      
+      // Create a new canvas with the same dimensions
+      const canvas = document.createElement('canvas');
+      canvas.width = mapCanvas.width;
+      canvas.height = mapCanvas.height;
+      
+      // Get the context and draw the map canvas onto it
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+      
+      // Clear the canvas first
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw the map canvas
+      ctx.drawImage(mapCanvas, 0, 0);
+      
+      // Convert to data URL
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      // Check if the data URL is valid (not blank)
+      if (dataUrl === 'data:,') {
+        throw new Error('Screenshot is blank. The map may not be fully rendered.');
+      }
+      
+      setScreenshotUrl(dataUrl);
+      setShowScreenshotPopup(true);
+    } catch (error) {
+      console.error('Error taking screenshot:', error);
+      alert('Failed to capture screenshot. Please try again.');
+    } finally {
+      setIsCapturingScreenshot(false);
+    }
+  };
+  
+  // Function to save screenshot to computer
+  const saveScreenshot = () => {
+    if (!screenshotUrl) return;
+    
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = screenshotUrl;
+    link.download = `firesight-map-${new Date().toISOString().slice(0, 10)}.png`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Close popup
+    setShowScreenshotPopup(false);
+  };
+  
+  // Function to handle email button click (placeholder for now)
+  const handleEmailClick = () => {
+    // This would be implemented later
+    setShowScreenshotPopup(false);
+  };
+
   return (
     <div className="relative w-full h-full">
       <div className="absolute top-4 left-4 z-10">
@@ -531,6 +615,70 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
           )}
         </div>
       </div>
+      
+      {/* Screenshot Button */}
+      <div className="absolute bottom-4 left-4 z-10">
+        <button
+          onClick={takeScreenshot}
+          disabled={isCapturingScreenshot}
+          className={`w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-xl hover:bg-blue-600 focus:outline-none transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl group ${isCapturingScreenshot ? 'opacity-70 cursor-not-allowed' : ''}`}
+        >
+          {isCapturingScreenshot ? (
+            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          ) : (
+            <Camera className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+          )}
+        </button>
+      </div>
+      
+      {/* Screenshot Popup */}
+      {showScreenshotPopup && (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-[2px] flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Map Screenshot</h3>
+              <button 
+                onClick={() => setShowScreenshotPopup(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            {screenshotUrl && (
+              <div className="mb-4 border border-gray-200 rounded overflow-hidden">
+                <img 
+                  src={screenshotUrl} 
+                  alt="Map Screenshot" 
+                  className="w-full h-auto"
+                />
+              </div>
+            )}
+            
+            <div className="flex justify-between">
+              <button
+                onClick={saveScreenshot}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none transition-all duration-300"
+              >
+                <Save className="h-4 w-4" />
+                <span>Save</span>
+              </button>
+              
+              <button
+                onClick={handleEmailClick}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none transition-all duration-300"
+              >
+                <Mail className="h-4 w-4" />
+                <span>Email</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute right-0 top-0 h-full">
         <InfoSidebar selectedCity={selectedCity || "Location"} visible={showInfoSidebar} />
