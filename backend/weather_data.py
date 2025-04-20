@@ -12,6 +12,13 @@ DAILY_VARS = [
     "wind_gusts_10m_max",
 ]
 
+# Current weather variables
+CURRENT_VARS = [
+    "temperature_2m",
+    "relative_humidity_2m",
+    "apparent_temperature",
+]
+
 def geocode_county(county: str, state: str) -> Tuple[float, float]:
     """Return (lat, lon) for '<county> County, <state>, USA'."""
     loc = Nominatim(user_agent="county-weather").geocode(f"{county} County, {state}, USA")
@@ -19,10 +26,12 @@ def geocode_county(county: str, state: str) -> Tuple[float, float]:
         raise ValueError("County not found—check spelling.")
     return loc.latitude, loc.longitude
 
-def fetch_forecast(lat: float, lon: float, days: int = 1) -> pd.DataFrame:
-    """Fetch weather forecast for specified number of days."""
+def fetch_forecast(lat: float, lon: float, days: int = 1) -> Tuple[pd.DataFrame, Dict]:
+    """Fetch weather forecast and current weather for specified number of days."""
     today = dt.date.today()
-    params = {
+    
+    # Fetch forecast data
+    forecast_params = {
         "latitude": lat,
         "longitude": lon,
         "timezone": "auto",
@@ -30,10 +39,25 @@ def fetch_forecast(lat: float, lon: float, days: int = 1) -> pd.DataFrame:
         "start_date": today.isoformat(),
         "end_date": (today + dt.timedelta(days=days-1)).isoformat(),
     }
-    r = requests.get("https://api.open-meteo.com/v1/forecast", params=params, timeout=10)
-    r.raise_for_status()
-    data = r.json()["daily"]
-    df = pd.DataFrame(data).rename(
+    
+    # Fetch current weather data
+    current_params = {
+        "latitude": lat,
+        "longitude": lon,
+        "timezone": "auto",
+        "current": ",".join(CURRENT_VARS),
+    }
+    
+    # Make API calls
+    forecast_r = requests.get("https://api.open-meteo.com/v1/forecast", params=forecast_params, timeout=10)
+    current_r = requests.get("https://api.open-meteo.com/v1/forecast", params=current_params, timeout=10)
+    
+    forecast_r.raise_for_status()
+    current_r.raise_for_status()
+    
+    # Process forecast data
+    forecast_data = forecast_r.json()["daily"]
+    df = pd.DataFrame(forecast_data).rename(
         columns={
             "time": "date",
             "temperature_2m_max": "t_max",
@@ -43,18 +67,41 @@ def fetch_forecast(lat: float, lon: float, days: int = 1) -> pd.DataFrame:
             "wind_gusts_10m_max": "gust_max",
         }
     )
-    return df
+    
+    # Process current weather data
+    current_data = current_r.json()
+    if "current" not in current_data:
+        print("Warning: No current weather data available")
+        current_weather = {
+            "current_temp": None,
+            "feels_like": None,
+            "humidity": None,
+        }
+    else:
+        current = current_data["current"]
+        current_weather = {
+            "current_temp": current.get("temperature_2m"),
+            "feels_like": current.get("apparent_temperature"),
+            "humidity": current.get("relative_humidity_2m"),
+        }
+    
+    return df, current_weather
 
 def get_weather_for_county(county: str, state: str) -> Dict[str, Any]:
     """Get weather data for a single county and return as dictionary."""
     try:
         lat, lon = geocode_county(county, state)
-        df = fetch_forecast(lat, lon, days=1)  # Only get today's forecast
+        df, current_weather = fetch_forecast(lat, lon, days=1)  # Only get today's forecast
         
         # Convert the first row to a dictionary
         if not df.empty:
             weather_data = df.iloc[0].to_dict()
-            # The date is already a string in the API response, no need to format it
+            # Add current weather data, using forecast data as fallback if current data is None
+            weather_data.update({
+                "current_temp": current_weather["current_temp"] or weather_data["t_max"],
+                "feels_like": current_weather["feels_like"] or weather_data["t_max"],
+                "humidity": current_weather["humidity"] or 50,  # Default humidity if not available
+            })
             return weather_data
         else:
             return {"error": "No data available"}

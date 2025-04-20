@@ -54,7 +54,18 @@ interface WeatherData {
   precip: number;
   wind_max: number;
   gust_max: number;
+  current_temp: number;
+  feels_like: number;
+  humidity: number;
 }
+
+// Add a helper function to format temperature
+const formatTemperature = (temp: number | null | undefined): string => {
+  if (temp === null || temp === undefined || isNaN(temp)) {
+    return "N/A";
+  }
+  return `${Math.round(temp)}°C`;
+};
 
 export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -440,22 +451,35 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                         <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
                           <div className="flex flex-col items-center">
                             <Cloud className="h-12 w-12 text-slate-600" />
-                            <span className="mt-2 text-3xl font-bold">
-                              {`${Math.round(weatherData.t_max)}°C`}
-                            </span>
-                            <span className="text-sm text-slate-500">
-                              {getWeatherCondition(weatherData.t_max, weatherData.precip)}
+                            <div className="mt-2 flex flex-col items-center">
+                              <span className="text-4xl font-bold">
+                                {formatTemperature(weatherData.current_temp)}
+                              </span>
+                              {weatherData.feels_like !== null && (
+                                <span className="text-sm text-slate-500">
+                                  Feels like {formatTemperature(weatherData.feels_like)}
+                                </span>
+                              )}
+                            </div>
+                            <span className="mt-1 text-sm text-slate-500">
+                              {getWeatherCondition(weatherData.current_temp || weatherData.t_max, weatherData.precip)}
                             </span>
                           </div>
                         </div>
 
                         <div className="space-y-1">
                           <h3 className="text-sm font-medium text-slate-500">High</h3>
-                          <p className="font-medium text-slate-800">{`${Math.round(weatherData.t_max)}°C`}</p>
+                          <p className="font-medium text-slate-800">{formatTemperature(weatherData.t_max)}</p>
                         </div>
                         <div className="space-y-1">
                           <h3 className="text-sm font-medium text-slate-500">Low</h3>
-                          <p className="font-medium text-slate-800">{`${Math.round(weatherData.t_min)}°C`}</p>
+                          <p className="font-medium text-slate-800">{formatTemperature(weatherData.t_min)}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
+                          <p className="font-medium text-slate-800">
+                            {weatherData.humidity !== null ? `${Math.round(weatherData.humidity)}%` : "N/A"}
+                          </p>
                         </div>
                         <div className="space-y-1">
                           <h3 className="text-sm font-medium text-slate-500">Wind</h3>
