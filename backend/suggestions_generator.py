@@ -55,7 +55,7 @@ def generate_suggestions(data: Dict, county: str = None) -> List[str]:
     
     prompt = f"""Based on the following demographic data{county_text}, provide specific, actionable suggestions 
     for how the state can create analytics opportunities and solutions to support data-driven, 
-    culturally and demographically sensitive fire recovery, response, and survivor support.
+    culturally and demographically sensitive fire recovery, response, and survivor support. SVI is the Social Vulnerability Index.
     
     Each suggestion should be a one-sentence recommendation for an analytics solution or opportunity
     that addresses the unique demographic challenges shown in the data.

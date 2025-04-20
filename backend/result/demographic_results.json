@@ -1,82 +1,86 @@
 {
   "Yolo": {
-    "Total households": 76107,
-    "Population 65 and older": 28323,
-    "Population under 18": 44537,
-    "Average household size": 2.7,
-    "High school graduate percentage": 18.0,
-    "Total population": 217141,
-    "Percentage speaking English less than very well": 13.0,
-    "Percentage with broadband internet subscription": 91.0,
-    "Percentage who drove alone (car/truck/van)": 65.8,
-    "Median household income": 85097,
-    "Percentage with no health insurance coverage": 4.7,
-    "Percentage of all families below poverty line": 8.0,
-    "Top 3 race population percentages": {
+    "total_households": 76107,
+    "pop_65_plus": 28323,
+    "pop_under_18": 44537,
+    "avg_household_size": 2.7,
+    "hs_grad_pct": 18.0,
+    "total_pop": 217141,
+    "eng_limited_pct": 13.0,
+    "broadband_pct": 91.0,
+    "drive_alone_pct": 65.8,
+    "median_income": 85097,
+    "no_health_ins_pct": 4.7,
+    "poverty_pct": 8.0,
+    "top_3_race": {
       "White": 58.8,
       "Asian": 14.7,
       "Some other race": 8.1
     },
-    "Hispanic/Latino percentage": 32.2
+    "hispanic_pct": 32.2,
+    "svi": 0.7366
   },
   "Shasta": {
-    "Total households": 71107,
-    "Population 65 and older": 38339,
-    "Population under 18": 39190,
-    "Average household size": 2.5,
-    "High school graduate percentage": null,
-    "Total population": 181852,
-    "Percentage speaking English less than very well": 2.5,
-    "Percentage with broadband internet subscription": 88.5,
-    "Percentage who drove alone (car/truck/van)": 78.6,
-    "Median household income": 68347,
-    "Percentage with no health insurance coverage": 6.6,
-    "Percentage of all families below poverty line": 8.2,
-    "Top 3 race population percentages": {
+    "total_households": 71107,
+    "pop_65_plus": 38339,
+    "pop_under_18": 39190,
+    "avg_household_size": 2.5,
+    "hs_grad_pct": null,
+    "total_pop": 181852,
+    "eng_limited_pct": 2.5,
+    "broadband_pct": 88.5,
+    "drive_alone_pct": 78.6,
+    "median_income": 68347,
+    "no_health_ins_pct": 6.6,
+    "poverty_pct": 8.2,
+    "top_3_race": {
       "White": 81.8,
       "Asian": 3.1,
       "American Indian and Alaska Native": 1.8
     },
-    "Hispanic/Latino percentage": 11.0
+    "hispanic_pct": 11.0,
+    "svi": 0.7649
   },
   "Los Angeles": {
-    "Total households": 3363093,
-    "Population 65 and older": 1415856,
-    "Population under 18": 2093072,
-    "Average household size": 2.9,
-    "High school graduate percentage": 20.4,
-    "Total population": 9936690,
-    "Percentage speaking English less than very well": 22.9,
-    "Percentage with broadband internet subscription": 90.2,
-    "Percentage who drove alone (car/truck/van)": 68.0,
-    "Median household income": 83411,
-    "Percentage with no health insurance coverage": 9.0,
-    "Percentage of all families below poverty line": 10.0,
-    "Top 3 race population percentages": {
+    "total_households": 3363093,
+    "pop_65_plus": 1415856,
+    "pop_under_18": 2093072,
+    "avg_household_size": 2.9,
+    "hs_grad_pct": 20.4,
+    "total_pop": 9936690,
+    "eng_limited_pct": 22.9,
+    "broadband_pct": 90.2,
+    "drive_alone_pct": 68.0,
+    "median_income": 83411,
+    "no_health_ins_pct": 9.0,
+    "poverty_pct": 10.0,
+    "top_3_race": {
       "White": 39.6,
       "Hispanic or Latino": 48.7,
       "Asian": 14.8
     },
-    "Hispanic/Latino percentage": 48.7
+    "hispanic_pct": 48.7,
+    "svi": 0.8629
   },
   "Monterey": {
-    "Total households": 130973,
-    "Population 65 and older": 62481,
-    "Population under 18": 113042,
-    "Average household size": 3.2,
-    "High school graduate percentage": null,
-    "Total population": 437609,
-    "Percentage speaking English less than very well": 25.4,
-    "Percentage with broadband internet subscription": 91.8,
-    "Percentage who drove alone (car/truck/van)": 69.1,
-    "Median household income": 91043,
-    "Percentage with no health insurance coverage": 9.9,
-    "Percentage of all families below poverty line": 9.0,
-    "Top 3 race population percentages": {
+    "total_households": 130973,
+    "pop_65_plus": 62481,
+    "pop_under_18": 113042,
+    "avg_household_size": 3.2,
+    "hs_grad_pct": null,
+    "total_pop": 437609,
+    "eng_limited_pct": 25.4,
+    "broadband_pct": 91.8,
+    "drive_alone_pct": 69.1,
+    "median_income": 91043,
+    "no_health_ins_pct": 9.9,
+    "poverty_pct": 9.0,
+    "top_3_race": {
       "White": 39.7,
       "Some other race": 39.9,
       "Asian": 5.9
     },
-    "Hispanic/Latino percentage": 59.9
+    "hispanic_pct": 59.9,
+    "svi": 0.8686
   }
 }
