@@ -75,15 +75,6 @@ export default function LandingPage() {
         {/* Static gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900/50 to-black" />
 
-        {/* Animated overlay */}
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.3) 0%, transparent 50%)',
-            animation: 'pulse 8s ease-in-out infinite',
-          }}
-        />
-
         {/* Ember particles */}
         {emberParticles.map((particle) => (
           <motion.div
@@ -231,12 +222,12 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 1.1 }}
           >
             <motion.button
-              className="flex items-center gap-3 text-lg font-medium text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-lg px-6 py-3 transition-all border border-slate-700/50 hover:border-slate-600/50 shadow-lg hover:shadow-orange-500/20 backdrop-blur-sm"
+              className="flex items-center gap-4 text-[2rem] text-white bg-black hover:bg-black/90 rounded-[32px] px-12 py-6 transition-all border-2 border-[#FF6B35]/20 hover:border-[#FF6B35]/40 shadow-lg hover:shadow-[#FF6B35]/20"
               onClick={handleEnterApp}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <MapPin className="h-5 w-5 text-orange-400" />
+              <MapPin className="h-8 w-8 text-[#FF6B35]" />
               <span>Launch</span>
             </motion.button>
           </motion.div>

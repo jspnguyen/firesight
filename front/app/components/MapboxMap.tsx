@@ -5,6 +5,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import InfoSidebar from './InfoSidebar';
 import type { Feature, Polygon } from 'geojson';
+import weatherData from './result/weather_results.json';
+import demographicData from './result/demographic_results.json';
 
 // Initialize Mapbox
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -26,41 +28,42 @@ const COUNTY_FIPS = {
   "Shasta County, CA": "089"
 } as const;
 
-// County GeoJSON data with rigid shapes
+// Calculate fire risk level based on weather and demographic data
+const calculateFireRisk = (countyName: string): number => {
+  const county = countyName.replace(", CA", "");
+  const weather = weatherData[county as keyof typeof weatherData];
+  const demographics = demographicData[county as keyof typeof demographicData];
+  
+  if (!weather || !demographics) return 0;
+  
+  // Normalize and weight different risk factors
+  const tempRisk = Math.min((weather.t_max - 15) / 20, 1); // Higher risk above 35°C
+  const windRisk = Math.min((weather.wind_max + weather.gust_max) / 100, 1); // Higher risk with strong winds
+  const precipRisk = Math.max(1 - weather.precip / 10, 0); // Lower risk with precipitation
+  const sviRisk = demographics.svi; // Social Vulnerability Index (already 0-1)
+  
+  // Combine risk factors (weights can be adjusted)
+  const totalRisk = (tempRisk * 0.3) + (windRisk * 0.3) + (precipRisk * 0.2) + (sviRisk * 0.2);
+  return Math.min(Math.max(totalRisk, 0), 1);
+};
+
+// County GeoJSON data with more accurate shapes
 const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
-  "Yolo County, CA": {
+  "Shasta County, CA": {
     type: "Feature",
-    properties: { name: "Yolo County" },
+    properties: { name: "Shasta County" },
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-122.0, 38.9], // Northwest
-        [-121.7, 38.9], // North
-        [-121.4, 38.8], // Northeast
-        [-121.4, 38.6], // East
-        [-121.5, 38.4], // Southeast
-        [-121.8, 38.3], // South
-        [-122.1, 38.5], // Southwest
-        [-122.0, 38.7], // West
-        [-122.0, 38.9]  // Back to start
-      ]]
-    }
-  },
-  "Santa Clara County, CA": {
-    type: "Feature",
-    properties: { name: "Santa Clara County" },
-    geometry: {
-      type: "Polygon",
-      coordinates: [[
-        [-122.2, 37.4], // Northwest
-        [-121.8, 37.5], // North
-        [-121.2, 37.4], // Northeast
-        [-121.3, 37.1], // East
-        [-121.5, 36.9], // Southeast
-        [-121.8, 36.9], // South
-        [-122.1, 37.1], // Southwest
-        [-122.2, 37.2], // West
-        [-122.2, 37.4]  // Back to start
+        [-122.9424, 41.1846], // Northwest
+        [-122.5972, 41.1998], // North
+        [-121.8307, 41.1834], // Northeast
+        [-121.7082, 40.8940], // East
+        [-121.6271, 40.4913], // Southeast
+        [-121.9183, 40.2766], // South
+        [-122.3681, 40.1385], // Southwest
+        [-122.6826, 40.3824], // West
+        [-122.9424, 41.1846]  // Back to start
       ]]
     }
   },
@@ -70,15 +73,33 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-118.9, 34.8],  // Northwest
-        [-117.8, 34.8],  // North
-        [-117.6, 34.5],  // Northeast
-        [-117.7, 34.0],  // East
-        [-118.1, 33.7],  // Southeast
-        [-118.4, 33.7],  // South
-        [-118.6, 33.9],  // Southwest
-        [-118.8, 34.3],  // West
-        [-118.9, 34.8]   // Back to start
+        [-118.9429, 34.8180], // Northwest
+        [-118.1664, 34.8900], // North
+        [-117.6551, 34.8235], // Northeast
+        [-117.6551, 34.0222], // East
+        [-118.1555, 33.7032], // Southeast
+        [-118.4083, 33.7032], // South
+        [-118.6831, 33.9037], // Southwest
+        [-118.8853, 34.0768], // West
+        [-118.9429, 34.8180]  // Back to start
+      ]]
+    }
+  },
+  "Yolo County, CA": {
+    type: "Feature",
+    properties: { name: "Yolo County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-122.1571, 38.8634], // Northwest
+        [-121.9073, 38.8525], // North
+        [-121.7466, 38.8525], // Northeast
+        [-121.5914, 38.5796], // East
+        [-121.4966, 38.3033], // Southeast
+        [-121.6847, 38.2924], // South
+        [-121.8618, 38.2924], // Southwest
+        [-122.0460, 38.5796], // West
+        [-122.1571, 38.8634]  // Back to start
       ]]
     }
   },
@@ -88,36 +109,118 @@ const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-121.9, 36.9], // Northwest
-        [-121.4, 36.9], // North
-        [-121.0, 36.7], // Northeast
-        [-121.1, 36.3], // East
-        [-121.3, 36.0], // Southeast
-        [-121.6, 35.9], // South
-        [-121.8, 36.2], // Southwest
-        [-121.9, 36.5], // West
-        [-121.9, 36.9]  // Back to start
+        [-121.9073, 36.9107], // Northwest
+        [-121.4582, 36.9107], // North
+        [-121.1429, 36.7305], // Northeast
+        [-120.8987, 36.3919], // East
+        [-121.2473, 35.9079], // Southeast
+        [-121.4692, 35.7932], // South
+        [-121.8508, 35.9189], // Southwest
+        [-121.9347, 36.3373], // West
+        [-121.9073, 36.9107]  // Back to start
       ]]
     }
   },
-  "Shasta County, CA": {
+  "Santa Clara County, CA": {
     type: "Feature",
-    properties: { name: "Shasta County" },
+    properties: { name: "Santa Clara County" },
     geometry: {
       type: "Polygon",
       coordinates: [[
-        [-122.8, 41.0], // Northwest
-        [-122.2, 41.1], // North
-        [-121.8, 41.0], // Northeast
-        [-121.7, 40.6], // East
-        [-121.9, 40.3], // Southeast
-        [-122.3, 40.2], // South
-        [-122.6, 40.4], // Southwest
-        [-122.8, 40.7], // West
-        [-122.8, 41.0]  // Back to start
+        [-122.2026, 37.4834], // Northwest
+        [-121.8398, 37.4889], // North
+        [-121.2144, 37.4725], // Northeast
+        [-121.2034, 37.1339], // East
+        [-121.4692, 36.9946], // Southeast
+        [-121.8398, 36.9946], // South
+        [-122.0460, 37.1339], // Southwest
+        [-122.2026, 37.2732], // West
+        [-122.2026, 37.4834]  // Back to start
       ]]
     }
   }
+};
+
+// High-risk zones within counties
+const HIGH_RISK_ZONES: Record<string, Array<Feature<Polygon>>> = {
+  "Shasta County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.9 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-122.5, 40.8], // Northwest corner
+          [-122.3, 40.8], // Northeast corner
+          [-122.3, 40.6], // Southeast corner
+          [-122.5, 40.6], // Southwest corner
+          [-122.5, 40.8]  // Close the polygon
+        ]]
+      }
+    },
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 2", riskLevel: 0.85 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-122.0, 40.7],
+          [-121.8, 40.7],
+          [-121.8, 40.5],
+          [-122.0, 40.5],
+          [-122.0, 40.7]
+        ]]
+      }
+    }
+  ],
+  "Los Angeles County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.95 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-118.5, 34.5],
+          [-118.3, 34.5],
+          [-118.3, 34.3],
+          [-118.5, 34.3],
+          [-118.5, 34.5]
+        ]]
+      }
+    }
+  ],
+  "Yolo County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.8 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-121.9, 38.7],
+          [-121.7, 38.7],
+          [-121.7, 38.5],
+          [-121.9, 38.5],
+          [-121.9, 38.7]
+        ]]
+      }
+    }
+  ],
+  "Monterey County, CA": [
+    {
+      type: "Feature" as const,
+      properties: { name: "High Risk Zone 1", riskLevel: 0.87 },
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [[
+          [-121.5, 36.5],
+          [-121.3, 36.5],
+          [-121.3, 36.3],
+          [-121.5, 36.3],
+          [-121.5, 36.5]
+        ]]
+      }
+    }
+  ]
 };
 
 interface MapboxMapProps {
@@ -145,20 +248,62 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       zoom: 5.5, // Good zoom level to see all of California
     });
 
+    // Add zoom controls to bottom right
+    newMap.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
     map.current = newMap;
 
     // Add markers once map is loaded
     newMap.on('load', () => {
-      // Add county boundaries source
+      // Calculate fire risk for all counties and add to features
+      const featuresWithRisk = Object.entries(COUNTY_BOUNDARIES).map(([cityName, feature]) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          fireRisk: calculateFireRisk(cityName)
+        }
+      }));
+
+      // Add county boundaries source first
       newMap.addSource('counties', {
         type: 'geojson',
         data: {
           type: 'FeatureCollection',
-          features: Object.values(COUNTY_BOUNDARIES)
+          features: featuresWithRisk
         }
       });
 
-      // Add county boundaries layer
+      // Add high-risk zones source
+      newMap.addSource('high-risk-zones', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: Object.values(HIGH_RISK_ZONES).flat()
+        }
+      });
+
+      // Add county fill layer first (underneath everything)
+      newMap.addLayer({
+        id: 'county-fill',
+        type: 'fill',
+        source: 'counties',
+        paint: {
+          'fill-color': 'rgba(255, 107, 53, 0.05)'  // Very light base color
+        }
+      });
+
+      // Add high-risk zones layer
+      newMap.addLayer({
+        id: 'high-risk-zones',
+        type: 'fill',
+        source: 'high-risk-zones',
+        paint: {
+          'fill-color': 'rgba(255, 0, 0, 0.4)',
+          'fill-outline-color': 'rgba(255, 0, 0, 0.8)'
+        }
+      });
+
+      // Add county boundaries layer on top
       newMap.addLayer({
         id: 'county-boundaries',
         type: 'line',
@@ -166,25 +311,16 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
         paint: {
           'line-color': '#FF6B35',
           'line-width': 2,
-          'line-opacity': 0.8
+          'line-opacity': 0.67
         }
       });
 
-      // Add county fill layer
-      newMap.addLayer({
-        id: 'county-fill',
-        type: 'fill',
-        source: 'counties',
-        paint: {
-          'fill-color': '#FF6B35',
-          'fill-opacity': 0.1
-        }
-      });
-
-      // Initially hide both layers
+      // Initially hide all layers
       newMap.setLayoutProperty('county-boundaries', 'visibility', 'none');
       newMap.setLayoutProperty('county-fill', 'visibility', 'none');
+      newMap.setLayoutProperty('high-risk-zones', 'visibility', 'none');
 
+      // Add markers for each city
       Object.entries(CITY_COORDINATES).forEach(([cityName, coords]) => {
         const marker = new mapboxgl.Marker()
           .setLngLat([coords.longitude, coords.latitude])
@@ -225,16 +361,45 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       onCitySelect(cityName);
     }
 
-    // Show the county boundaries
+    // Show the layers only for the selected county
     map.current.setLayoutProperty('county-boundaries', 'visibility', 'visible');
     map.current.setLayoutProperty('county-fill', 'visibility', 'visible');
+    map.current.setLayoutProperty('high-risk-zones', 'visibility', 'visible');
 
     // Get the county name without ", CA" suffix
     const countyName = cityName.replace(', CA', '');
 
+    // Calculate fire risk for the selected county
+    const fireRisk = calculateFireRisk(cityName);
+
+    // Update the source data to include fire risk
+    const countyFeature = COUNTY_BOUNDARIES[cityName];
+    if (countyFeature) {
+      countyFeature.properties = {
+        ...countyFeature.properties,
+        fireRisk: fireRisk
+      };
+    }
+
+    // Update source data to show only the selected county
+    if (map.current.getSource('counties')) {
+      (map.current.getSource('counties') as mapboxgl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: [countyFeature]
+      });
+    }
+
+    // Update high-risk zones to show only for selected county
+    if (map.current.getSource('high-risk-zones')) {
+      const countyRiskZones = HIGH_RISK_ZONES[cityName] || [];
+      (map.current.getSource('high-risk-zones') as mapboxgl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: countyRiskZones
+      });
+    }
+
     // Update filters to show only the selected county
     const filter: mapboxgl.FilterSpecification = ['==', ['get', 'name'], countyName];
-
     map.current.setFilter('county-boundaries', filter);
     map.current.setFilter('county-fill', filter);
 
@@ -268,6 +433,11 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       }, 300);
       return;
     }
+
+    // If not a predefined city, hide all layers
+    map.current.setLayoutProperty('county-boundaries', 'visibility', 'none');
+    map.current.setLayoutProperty('county-fill', 'visibility', 'none');
+    map.current.setLayoutProperty('high-risk-zones', 'visibility', 'none');
 
     // If not a predefined city, search using Mapbox Geocoding API
     try {
