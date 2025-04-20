@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import InfoSidebar from './InfoSidebar';
+import type { Feature, Polygon } from 'geojson';
 
 // Initialize Mapbox
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -15,6 +16,109 @@ const CITY_COORDINATES = {
   "Monterey County, CA": { longitude: -121.8947, latitude: 36.6005, zoom: 11 },
   "Shasta County, CA": { longitude: -122.3784, latitude: 40.5865, zoom: 10 },
 } as const;
+
+// County FIPS codes for California
+const COUNTY_FIPS = {
+  "Yolo County, CA": "113",
+  "Santa Clara County, CA": "085",
+  "Los Angeles County, CA": "037",
+  "Monterey County, CA": "053",
+  "Shasta County, CA": "089"
+} as const;
+
+// County GeoJSON data with rigid shapes
+const COUNTY_BOUNDARIES: Record<string, Feature<Polygon>> = {
+  "Yolo County, CA": {
+    type: "Feature",
+    properties: { name: "Yolo County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-122.0, 38.9], // Northwest
+        [-121.7, 38.9], // North
+        [-121.4, 38.8], // Northeast
+        [-121.4, 38.6], // East
+        [-121.5, 38.4], // Southeast
+        [-121.8, 38.3], // South
+        [-122.1, 38.5], // Southwest
+        [-122.0, 38.7], // West
+        [-122.0, 38.9]  // Back to start
+      ]]
+    }
+  },
+  "Santa Clara County, CA": {
+    type: "Feature",
+    properties: { name: "Santa Clara County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-122.2, 37.4], // Northwest
+        [-121.8, 37.5], // North
+        [-121.2, 37.4], // Northeast
+        [-121.3, 37.1], // East
+        [-121.5, 36.9], // Southeast
+        [-121.8, 36.9], // South
+        [-122.1, 37.1], // Southwest
+        [-122.2, 37.2], // West
+        [-122.2, 37.4]  // Back to start
+      ]]
+    }
+  },
+  "Los Angeles County, CA": {
+    type: "Feature",
+    properties: { name: "Los Angeles County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-118.9, 34.8],  // Northwest
+        [-117.8, 34.8],  // North
+        [-117.6, 34.5],  // Northeast
+        [-117.7, 34.0],  // East
+        [-118.1, 33.7],  // Southeast
+        [-118.4, 33.7],  // South
+        [-118.6, 33.9],  // Southwest
+        [-118.8, 34.3],  // West
+        [-118.9, 34.8]   // Back to start
+      ]]
+    }
+  },
+  "Monterey County, CA": {
+    type: "Feature",
+    properties: { name: "Monterey County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-121.9, 36.9], // Northwest
+        [-121.4, 36.9], // North
+        [-121.0, 36.7], // Northeast
+        [-121.1, 36.3], // East
+        [-121.3, 36.0], // Southeast
+        [-121.6, 35.9], // South
+        [-121.8, 36.2], // Southwest
+        [-121.9, 36.5], // West
+        [-121.9, 36.9]  // Back to start
+      ]]
+    }
+  },
+  "Shasta County, CA": {
+    type: "Feature",
+    properties: { name: "Shasta County" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-122.8, 41.0], // Northwest
+        [-122.2, 41.1], // North
+        [-121.8, 41.0], // Northeast
+        [-121.7, 40.6], // East
+        [-121.9, 40.3], // Southeast
+        [-122.3, 40.2], // South
+        [-122.6, 40.4], // Southwest
+        [-122.8, 40.7], // West
+        [-122.8, 41.0]  // Back to start
+      ]]
+    }
+  }
+};
 
 interface MapboxMapProps {
   onCitySelect?: (city: string) => void;
@@ -45,6 +149,42 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
 
     // Add markers once map is loaded
     newMap.on('load', () => {
+      // Add county boundaries source
+      newMap.addSource('counties', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: Object.values(COUNTY_BOUNDARIES)
+        }
+      });
+
+      // Add county boundaries layer
+      newMap.addLayer({
+        id: 'county-boundaries',
+        type: 'line',
+        source: 'counties',
+        paint: {
+          'line-color': '#FF6B35',
+          'line-width': 2,
+          'line-opacity': 0.8
+        }
+      });
+
+      // Add county fill layer
+      newMap.addLayer({
+        id: 'county-fill',
+        type: 'fill',
+        source: 'counties',
+        paint: {
+          'fill-color': '#FF6B35',
+          'fill-opacity': 0.1
+        }
+      });
+
+      // Initially hide both layers
+      newMap.setLayoutProperty('county-boundaries', 'visibility', 'none');
+      newMap.setLayoutProperty('county-fill', 'visibility', 'none');
+
       Object.entries(CITY_COORDINATES).forEach(([cityName, coords]) => {
         const marker = new mapboxgl.Marker()
           .setLngLat([coords.longitude, coords.latitude])
@@ -84,6 +224,19 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
     if (onCitySelect) {
       onCitySelect(cityName);
     }
+
+    // Show the county boundaries
+    map.current.setLayoutProperty('county-boundaries', 'visibility', 'visible');
+    map.current.setLayoutProperty('county-fill', 'visibility', 'visible');
+
+    // Get the county name without ", CA" suffix
+    const countyName = cityName.replace(', CA', '');
+
+    // Update filters to show only the selected county
+    const filter: mapboxgl.FilterSpecification = ['==', ['get', 'name'], countyName];
+
+    map.current.setFilter('county-boundaries', filter);
+    map.current.setFilter('county-fill', filter);
 
     map.current.flyTo({
       center: [coords.longitude, coords.latitude],
