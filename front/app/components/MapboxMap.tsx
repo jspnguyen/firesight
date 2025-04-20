@@ -9,9 +9,11 @@ import InfoSidebar from './InfoSidebar';
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const CITY_COORDINATES = {
-  "Davis, CA": { longitude: -121.7405, latitude: 38.5449, zoom: 13 },
-  "San Jose, CA": { longitude: -121.8863, latitude: 37.3382, zoom: 12 },
-  "Los Angeles, CA": { longitude: -118.2437, latitude: 34.0522, zoom: 11 },
+  "Yolo County, CA": { longitude: -121.7405, latitude: 38.5449, zoom: 11 },
+  "Santa Clara County, CA": { longitude: -121.8863, latitude: 37.3382, zoom: 11 },
+  "Los Angeles County, CA": { longitude: -118.2437, latitude: 34.0522, zoom: 10 },
+  "Monterey County, CA": { longitude: -121.8947, latitude: 36.6005, zoom: 11 },
+  "Shasta County, CA": { longitude: -122.3784, latitude: 40.5865, zoom: 10 },
 } as const;
 
 interface MapboxMapProps {

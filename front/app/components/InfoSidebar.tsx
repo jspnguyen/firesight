@@ -11,28 +11,11 @@ import suggestionsData from "./result/suggestions_results.json"
 
 // Map of cities to their corresponding counties
 const cityToCountyMap = {
-  "Davis, CA": "Yolo",
-  "San Jose, CA": "Santa Clara", // Note: Santa Clara is not in our JSON, will need to handle this
-  "Los Angeles, CA": "Los Angeles",
-}
-
-// Language data (still hardcoded as it's not in the JSON)
-const languageData = {
-  "Davis, CA": [
-    { name: "English", percentage: "75.5%" },
-    { name: "Chinese", percentage: "12.5%" },
-    { name: "Spanish", percentage: "8%" },
-  ],
-  "San Jose, CA": [
-    { name: "English", percentage: "43%" },
-    { name: "Spanish", percentage: "23.5%" },
-    { name: "Vietnamese", percentage: "10.8%" },
-  ],
-  "Los Angeles, CA": [
-    { name: "English", percentage: "40%" },
-    { name: "Spanish", percentage: "42%" },
-    { name: "Chinese", percentage: "2.4%" },
-  ],
+  "Yolo County, CA": "Yolo",
+  "Santa Clara County, CA": "Santa Clara", // Note: Santa Clara is not in our JSON, will need to handle this
+  "Los Angeles County, CA": "Los Angeles",
+  "Monterey County, CA": "Monterey",
+  "Shasta County, CA": "Shasta"
 }
 
 // Weather condition mapping based on temperature and precipitation
@@ -79,8 +62,13 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
     ? suggestionsData[countyName as keyof typeof suggestionsData] 
     : defaultSuggestions;
   
-  // Get the language data for the selected city
-  const languages = isKnownCity ? languageData[selectedCity as keyof typeof languageData] : null;
+  // Get the race data from the demographic data
+  const raceData = countyData?.top_3_race ? 
+    Object.entries(countyData.top_3_race).map(([name, percentage]) => ({
+      name,
+      percentage: `${percentage}%`
+    })) : 
+    null;
 
   useEffect(() => {
     if (visible) {
@@ -93,7 +81,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   const renderNoDataMessage = () => (
     <div className="p-4 text-center text-slate-500">
       <p className="text-lg font-medium">Data not available</p>
-      <p className="mt-2 text-sm">We currently only have data for Davis, San Jose, and Los Angeles.</p>
+      <p className="mt-2 text-sm">We currently only have data for Yolo County, Santa Clara County, Los Angeles County, Monterey County, and Shasta County.</p>
     </div>
   );
 
@@ -153,19 +141,19 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Info className="h-5 w-5 text-slate-600" />
-                  {selectedCity || "Location"} Information
+                  {selectedCity || "Location"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {!isKnownCity ? renderNoDataMessage() : (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-medium text-slate-700">Languages</h3>
+                      <h3 className="font-medium text-slate-700">Top 3 Races</h3>
                       <ul className="mt-1 space-y-1 pl-5 text-sm">
-                        {languages?.map((lang, index) => (
+                        {raceData?.map((race, index) => (
                           <li key={index} className="flex items-center justify-between">
-                            <span>#{index + 1}: {lang.name}</span>
-                            <span className="font-medium text-slate-700">{lang.percentage}</span>
+                            <span>#{index + 1}: {race.name}</span>
+                            <span className="font-medium text-slate-700">{race.percentage}</span>
                           </li>
                         ))}
                       </ul>
