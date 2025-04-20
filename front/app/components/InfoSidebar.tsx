@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import demographicData from "./result/demographic_results.json"
-import weatherData from "./result/weather_results.json"
 import suggestionsData from "./result/suggestions_results.json"
 
 // Map of cities to their corresponding counties
@@ -48,6 +47,15 @@ interface RaceData {
   percentage: string;
 }
 
+interface WeatherData {
+  date: string;
+  t_max: number;
+  t_min: number;
+  precip: number;
+  wind_max: number;
+  gust_max: number;
+}
+
 export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [visibleSuggestions, setVisibleSuggestions] = useState<number[]>([])
@@ -56,6 +64,9 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   const [isScrollable, setIsScrollable] = useState(false)
   const [isAtBottom, setIsAtBottom] = useState(false)
   const [allSuggestionsShown, setAllSuggestionsShown] = useState(false)
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
+  const [weatherLoading, setWeatherLoading] = useState(false)
+  const [weatherError, setWeatherError] = useState<string | null>(null)
   
   // Check if the selected city is one of our predefined cities
   const isKnownCity = selectedCity && Object.keys(cityToCountyMap).includes(selectedCity);
@@ -65,9 +76,6 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   
   // Get the demographic data for the county
   const countyData = countyName ? demographicData[countyName as keyof typeof demographicData] : null;
-  
-  // Get the weather data for the county
-  const countyWeather = countyName ? weatherData[countyName as keyof typeof weatherData] : null;
   
   // Get the suggestions data for the county, with fallback to default suggestions
   const countySuggestions = countyName && suggestionsData[countyName as keyof typeof suggestionsData] 
@@ -178,6 +186,35 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
       });
     }
   };
+
+  // Fetch weather data when county changes
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      if (!countyName) {
+        setWeatherData(null)
+        return
+      }
+
+      setWeatherLoading(true)
+      setWeatherError(null)
+
+      try {
+        const response = await fetch(`http://localhost:8000/api/weather/${countyName}`)
+        if (!response.ok) {
+          throw new Error(`Weather data not found for ${countyName}`)
+        }
+        const data = await response.json()
+        setWeatherData(data)
+      } catch (error) {
+        setWeatherError(error instanceof Error ? error.message : 'Failed to fetch weather data')
+        setWeatherData(null)
+      } finally {
+        setWeatherLoading(false)
+      }
+    }
+
+    fetchWeatherData()
+  }, [countyName])
 
   const renderNoDataMessage = () => (
     <div className="p-4 text-center text-slate-500">
@@ -390,42 +427,54 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
               <CardContent>
                 {!isKnownCity ? renderNoDataMessage() : (
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
-                      <div className="flex flex-col items-center">
-                        <Cloud className="h-12 w-12 text-slate-600" />
-                        <span className="mt-2 text-3xl font-bold">
-                          {countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}
-                        </span>
-                        <span className="text-sm text-slate-500">
-                          {countyWeather ? getWeatherCondition(countyWeather.t_max, countyWeather.precip) : "N/A"}
-                        </span>
+                    {weatherLoading ? (
+                      <div className="col-span-2 flex items-center justify-center p-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
                       </div>
-                    </div>
+                    ) : weatherError ? (
+                      <div className="col-span-2 text-center text-red-500 p-4">
+                        {weatherError}
+                      </div>
+                    ) : weatherData ? (
+                      <>
+                        <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
+                          <div className="flex flex-col items-center">
+                            <Cloud className="h-12 w-12 text-slate-600" />
+                            <span className="mt-2 text-3xl font-bold">
+                              {`${Math.round(weatherData.t_max)}°C`}
+                            </span>
+                            <span className="text-sm text-slate-500">
+                              {getWeatherCondition(weatherData.t_max, weatherData.precip)}
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">High</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Low</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_min)}°C` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.wind_max} km/h` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.gust_max} km/h` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.precip} mm` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Date</h3>
-                      <p className="font-medium text-slate-800">{countyWeather ? countyWeather.date : "N/A"}</p>
-                    </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">High</h3>
+                          <p className="font-medium text-slate-800">{`${Math.round(weatherData.t_max)}°C`}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Low</h3>
+                          <p className="font-medium text-slate-800">{`${Math.round(weatherData.t_min)}°C`}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Wind</h3>
+                          <p className="font-medium text-slate-800">{`${weatherData.wind_max} km/h`}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Gust</h3>
+                          <p className="font-medium text-slate-800">{`${weatherData.gust_max} km/h`}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
+                          <p className="font-medium text-slate-800">{`${weatherData.precip} mm`}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-medium text-slate-500">Date</h3>
+                          <p className="font-medium text-slate-800">{weatherData.date}</p>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 )}
               </CardContent>
