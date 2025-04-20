@@ -206,7 +206,7 @@ export default function LandingPage() {
 
           {/* Catchphrase */}
           <motion.p
-            className="text-white mt-4 max-w-md text-xl text-slate-300 md:text-2xl"
+            className="mt-4 max-w-md text-xl text-slate-200 md:text-2xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
