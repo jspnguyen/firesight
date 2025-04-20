@@ -386,7 +386,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
         type: 'fill',
         source: 'counties',
         paint: {
-          'fill-color': 'rgba(255, 107, 53, 0.05)'  // Very light base color
+          'fill-color': 'rgba(255, 165, 0, 0.2)'  // Light orange color with 20% opacity
         }
       });
 
