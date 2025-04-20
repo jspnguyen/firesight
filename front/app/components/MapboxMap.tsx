@@ -948,43 +948,59 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
 
       {/* Screenshot Popup */}
       {showScreenshotPopup && (
-        <div className="fixed inset-0 bg-transparent backdrop-blur-[2px] flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Map Screenshot</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 max-w-2xl w-full mx-4 border border-white/20">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center shadow-lg">
+                  <Camera className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold bg-gradient-to-r from-orange-600 to-rose-600 bg-clip-text text-transparent">
+                  Map Screenshot
+                </h3>
+              </div>
               <button 
                 onClick={() => setShowScreenshotPopup(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-slate-400 hover:text-rose-500 transition-all duration-300 hover:rotate-90 p-2 hover:bg-slate-100 rounded-xl"
               >
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               </button>
             </div>
             
             {screenshotUrl && (
-              <div className="mb-4 border border-gray-200 rounded overflow-hidden">
-                <img 
-                  src={screenshotUrl} 
-                  alt="Map Screenshot" 
-                  className="w-full h-auto"
-                />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-rose-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="mb-6 rounded-2xl overflow-hidden shadow-xl border border-slate-200/50 transition-all duration-300 group-hover:scale-[1.01] group-hover:shadow-orange-500/25">
+                  <img 
+                    src={screenshotUrl} 
+                    alt="Map Screenshot" 
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             )}
             
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-4 mt-8">
               <button
                 onClick={saveScreenshot}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none transition-all duration-300"
+                className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 
+                  text-white rounded-2xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+                  relative overflow-hidden group"
               >
-                <Save className="h-4 w-4" />
-                <span>Save</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                <Save className="h-5 w-5" />
+                <span className="text-lg font-medium">Save to Device</span>
               </button>
               
               <button
                 onClick={handleEmailClick}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none transition-all duration-300"
+                className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 
+                  text-white rounded-2xl shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+                  relative overflow-hidden group"
               >
-                <Mail className="h-4 w-4" />
-                <span>Email</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                <Mail className="h-5 w-5" />
+                <span className="text-lg font-medium">Share via Email</span>
               </button>
             </div>
           </div>
