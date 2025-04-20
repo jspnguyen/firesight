@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Flame, MapPin } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -10,6 +10,33 @@ export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
   const [isMounted, setIsMounted] = useState(false)
+
+  // Memoize static values to prevent unnecessary recalculations
+  const emberParticles = useMemo(() => 
+    [...Array(30)].map((_, i) => ({
+      id: i,
+      initialX: Math.random() * windowSize.width,
+      initialY: windowSize.height + Math.random() * 100,
+      opacity: 0.3 + Math.random() * 0.7,
+      scale: 0.5 + Math.random() * 1.5,
+      duration: 5 + Math.random() * 10,
+      delay: Math.random() * 20,
+      width: 2 + Math.random() * 4,
+      height: 2 + Math.random() * 4,
+      color: `rgb(${220 + Math.random() * 35}, ${100 + Math.random() * 50}, ${Math.random() * 30})`,
+      glowSize: 5 + Math.random() * 10,
+      glowSpread: 3 + Math.random() * 5
+    })), [windowSize.width, windowSize.height])
+
+  const smokeParticles = useMemo(() => 
+    [...Array(5)].map((_, i) => ({
+      id: i,
+      initialX: 200 + i * 300,
+      duration: 20 + i * 5,
+      delay: i * 4,
+      width: 50 + Math.random() * 100,
+      height: 50 + Math.random() * 100
+    })), [])
 
   useEffect(() => {
     setIsMounted(true)
@@ -42,66 +69,59 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-slate-900">
+    <div className="relative h-screen w-full overflow-hidden bg-black">
       {/* Animated background */}
       <div className="absolute inset-0 z-0">
-        {/* Gradient background */}
+        {/* Static gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900/50 to-black" />
+
+        {/* Animated overlay */}
         <div
-          className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+          className="absolute inset-0 opacity-30"
           style={{
-            backgroundSize: "400% 400%",
-            animation: "gradientShift 15s ease infinite",
+            background: 'radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.3) 0%, transparent 50%)',
+            animation: 'pulse 8s ease-in-out infinite',
           }}
         />
 
-        {/* Forest silhouette */}
-        <div className="absolute bottom-0 left-0 right-0 h-[30vh] bg-black/20 backdrop-blur-sm">
-          <svg className="absolute bottom-0 w-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path
-              d="M0,0 L0,120 L1200,120 L1200,0 L0,0 Z M100,120 L100,70 L130,90 L160,60 L190,80 L220,50 L250,70 L280,40 L310,60 L340,30 L370,50 L400,20 L430,40 L460,10 L490,30 L520,0 L550,20 L580,0 L610,30 L640,10 L670,40 L700,20 L730,50 L760,30 L790,60 L820,40 L850,70 L880,50 L910,80 L940,60 L970,90 L1000,70 L1030,100 L1060,80 L1090,110 L1120,90 L1150,120 L1200,120 Z"
-              fill="rgba(0, 0, 0, 0.8)"
-            />
-          </svg>
-        </div>
-
         {/* Ember particles */}
-        {[...Array(30)].map((_, i) => (
+        {emberParticles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             className="absolute rounded-full"
             initial={{
-              x: Math.random() * windowSize.width,
-              y: windowSize.height + Math.random() * 100,
-              opacity: 0.3 + Math.random() * 0.7,
-              scale: 0.5 + Math.random() * 1.5,
+              x: particle.initialX,
+              y: particle.initialY,
+              opacity: particle.opacity,
+              scale: particle.scale,
             }}
             animate={{
               y: -100,
-              opacity: [0.3 + Math.random() * 0.7, 0],
-              scale: [0.5 + Math.random() * 1.5, 0],
+              opacity: [particle.opacity, 0],
+              scale: [particle.scale, 0],
             }}
             transition={{
               repeat: Number.POSITIVE_INFINITY,
-              duration: 5 + Math.random() * 10,
-              delay: Math.random() * 20,
+              duration: particle.duration,
+              delay: particle.delay,
               ease: "easeOut",
             }}
             style={{
-              width: `${2 + Math.random() * 4}px`,
-              height: `${2 + Math.random() * 4}px`,
-              background: `rgb(${220 + Math.random() * 35}, ${100 + Math.random() * 50}, ${Math.random() * 30})`,
-              boxShadow: `0 0 ${5 + Math.random() * 10}px ${3 + Math.random() * 5}px rgba(${220 + Math.random() * 35}, ${100 + Math.random() * 50}, ${Math.random() * 30}, 0.8)`,
+              width: `${particle.width}px`,
+              height: `${particle.height}px`,
+              background: particle.color,
+              boxShadow: `0 0 ${particle.glowSize}px ${particle.glowSpread}px ${particle.color.replace('rgb', 'rgba').replace(')', ', 0.8)')}`,
             }}
           />
         ))}
 
         {/* Smoke effect */}
-        {[...Array(5)].map((_, i) => (
+        {smokeParticles.map((particle) => (
           <motion.div
-            key={`smoke-${i}`}
+            key={`smoke-${particle.id}`}
             className="absolute rounded-full bg-white/5 backdrop-blur-md"
             initial={{
-              x: 200 + i * 300,
+              x: particle.initialX,
               y: windowSize.height,
               scale: 1,
               opacity: 0.1,
@@ -113,13 +133,13 @@ export default function LandingPage() {
             }}
             transition={{
               repeat: Number.POSITIVE_INFINITY,
-              duration: 20 + i * 5,
-              delay: i * 4,
+              duration: particle.duration,
+              delay: particle.delay,
               ease: "easeOut",
             }}
             style={{
-              width: `${50 + Math.random() * 100}px`,
-              height: `${50 + Math.random() * 100}px`,
+              width: `${particle.width}px`,
+              height: `${particle.height}px`,
               filter: "blur(40px)",
             }}
           />
@@ -211,13 +231,13 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 1.1 }}
           >
             <motion.button
-              className="flex items-center gap-4 text-[2rem] text-white bg-[#E85D04] hover:bg-[#DC5803] rounded-[32px] px-8 py-4 transition-colors border-2 border-orange-300 shadow-lg hover:shadow-orange-500/50"
+              className="flex items-center gap-3 text-lg font-medium text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-lg px-6 py-3 transition-all border border-slate-700/50 hover:border-slate-600/50 shadow-lg hover:shadow-orange-500/20 backdrop-blur-sm"
               onClick={handleEnterApp}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <MapPin className="h-8 w-8" />
-              <span>Launch Application</span>
+              <MapPin className="h-5 w-5 text-orange-400" />
+              <span>Launch</span>
             </motion.button>
           </motion.div>
         </motion.div>
@@ -225,10 +245,10 @@ export default function LandingPage() {
 
       {/* CSS for animations */}
       <style jsx>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.2); opacity: 0.4; }
+          100% { transform: scale(1); opacity: 0.3; }
         }
       `}</style>
     </div>
