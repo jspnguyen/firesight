@@ -127,7 +127,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
         const [longitude, latitude] = data.features[0].center;
         const placeName = data.features[0].place_name;
 
-        setSelectedCity(null);
+        setSelectedCity(placeName);
         
         if (onCitySelect) {
           onCitySelect(placeName);
@@ -208,7 +208,7 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
       </div>
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute right-0 top-0 h-full">
-        <InfoSidebar selectedCity={selectedCity || "Davis, CA"} visible={showInfoSidebar} />
+        <InfoSidebar selectedCity={selectedCity || "Location"} visible={showInfoSidebar} />
       </div>
     </div>
   );

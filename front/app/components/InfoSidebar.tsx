@@ -55,29 +55,32 @@ const defaultSuggestions = [
 ]
 
 interface InfoSidebarProps {
-  selectedCity: string;
+  selectedCity: string | null;
   visible: boolean;
 }
 
-export default function InfoSidebar({ selectedCity = "Davis, CA", visible = false }: InfoSidebarProps) {
+export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
+  // Check if the selected city is one of our predefined cities
+  const isKnownCity = selectedCity && Object.keys(cityToCountyMap).includes(selectedCity);
+  
   // Get the county name for the selected city
-  const countyName = cityToCountyMap[selectedCity as keyof typeof cityToCountyMap]
+  const countyName = isKnownCity ? cityToCountyMap[selectedCity as keyof typeof cityToCountyMap] : null;
   
   // Get the demographic data for the county
-  const countyData = countyName ? demographicData[countyName as keyof typeof demographicData] : null
+  const countyData = countyName ? demographicData[countyName as keyof typeof demographicData] : null;
   
   // Get the weather data for the county
-  const countyWeather = countyName ? weatherData[countyName as keyof typeof weatherData] : null
+  const countyWeather = countyName ? weatherData[countyName as keyof typeof weatherData] : null;
   
   // Get the suggestions data for the county, with fallback to default suggestions
   const countySuggestions = countyName && suggestionsData[countyName as keyof typeof suggestionsData] 
     ? suggestionsData[countyName as keyof typeof suggestionsData] 
-    : defaultSuggestions
+    : defaultSuggestions;
   
   // Get the language data for the selected city
-  const languages = languageData[selectedCity as keyof typeof languageData]
+  const languages = isKnownCity ? languageData[selectedCity as keyof typeof languageData] : null;
 
   useEffect(() => {
     if (visible) {
@@ -86,6 +89,13 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
       setSidebarOpen(false);
     }
   }, [visible]);
+
+  const renderNoDataMessage = () => (
+    <div className="p-4 text-center text-slate-500">
+      <p className="text-lg font-medium">Data not available</p>
+      <p className="mt-2 text-sm">We currently only have data for Davis, San Jose, and Los Angeles.</p>
+    </div>
+  );
 
   return (
     <div
@@ -143,50 +153,52 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Info className="h-5 w-5 text-slate-600" />
-                  {selectedCity} Information
+                  {selectedCity || "Location"} Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-slate-700">Languages</h3>
-                    <ul className="mt-1 space-y-1 pl-5 text-sm">
-                      {languages.map((lang, index) => (
-                        <li key={index} className="flex items-center justify-between">
-                          <span>#{index + 1}: {lang.name}</span>
-                          <span className="font-medium text-slate-700">{lang.percentage}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                {!isKnownCity ? renderNoDataMessage() : (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-slate-700">Languages</h3>
+                      <ul className="mt-1 space-y-1 pl-5 text-sm">
+                        {languages?.map((lang, index) => (
+                          <li key={index} className="flex items-center justify-between">
+                            <span>#{index + 1}: {lang.name}</span>
+                            <span className="font-medium text-slate-700">{lang.percentage}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Population</h3>
-                      <p className="font-medium text-slate-800">{countyData ? countyData.total_pop.toLocaleString() : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Median Income</h3>
-                      <p className="font-medium text-slate-800">{countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Avg. Household Size</h3>
-                      <p className="font-medium text-slate-800">{countyData ? `${countyData.avg_household_size} people` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Poverty Rate</h3>
-                      <p className="font-medium text-slate-800">{countyData ? `${countyData.poverty_pct}%` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Limited English</h3>
-                      <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_limited_pct}%` : "N/A"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Social Vulnerability</h3>
-                      <p className="font-medium text-slate-800">{countyData ? countyData.svi.toFixed(2) : "N/A"}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Population</h3>
+                        <p className="font-medium text-slate-800">{countyData ? countyData.total_pop.toLocaleString() : "N/A"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Median Income</h3>
+                        <p className="font-medium text-slate-800">{countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Avg. Household Size</h3>
+                        <p className="font-medium text-slate-800">{countyData ? `${countyData.avg_household_size} people` : "N/A"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Poverty Rate</h3>
+                        <p className="font-medium text-slate-800">{countyData ? `${countyData.poverty_pct}%` : "N/A"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Limited English</h3>
+                        <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_limited_pct}%` : "N/A"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Social Vulnerability</h3>
+                        <p className="font-medium text-slate-800">{countyData ? countyData.svi.toFixed(2) : "N/A"}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -203,44 +215,46 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
-                    <div className="flex flex-col items-center">
-                      <Cloud className="h-12 w-12 text-slate-600" />
-                      <span className="mt-2 text-3xl font-bold">
-                        {countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}
-                      </span>
-                      <span className="text-sm text-slate-500">
-                        {countyWeather ? getWeatherCondition(countyWeather.t_max, countyWeather.precip) : "N/A"}
-                      </span>
+                {!isKnownCity ? renderNoDataMessage() : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
+                      <div className="flex flex-col items-center">
+                        <Cloud className="h-12 w-12 text-slate-600" />
+                        <span className="mt-2 text-3xl font-bold">
+                          {countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}
+                        </span>
+                        <span className="text-sm text-slate-500">
+                          {countyWeather ? getWeatherCondition(countyWeather.t_max, countyWeather.precip) : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">High</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Low</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_min)}°C` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Wind</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.wind_max} km/h` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Gust</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.gust_max} km/h` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.precip} mm` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Date</h3>
+                      <p className="font-medium text-slate-800">{countyWeather ? countyWeather.date : "N/A"}</p>
                     </div>
                   </div>
-
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">High</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Low</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_min)}°C` : "N/A"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.wind_max} km/h` : "N/A"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.gust_max} km/h` : "N/A"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.precip} mm` : "N/A"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Date</h3>
-                    <p className="font-medium text-slate-800">{countyWeather ? countyWeather.date : "N/A"}</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -257,33 +271,35 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {countySuggestions.map((suggestion, index) => (
-                    <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5 rounded-full bg-amber-100 p-1">
-                          <Lightbulb className="h-4 w-4 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-800">{suggestion}</p>
-                          <div className="mt-1 flex gap-2">
-                            <Button variant="outline" size="sm" className="h-7 text-xs">
-                              Volunteer
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-xs">
-                              Learn More
-                            </Button>
+                {!isKnownCity ? renderNoDataMessage() : (
+                  <div className="space-y-3">
+                    {countySuggestions.map((suggestion, index) => (
+                      <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 rounded-full bg-amber-100 p-1">
+                            <Lightbulb className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-800">{suggestion}</p>
+                            <div className="mt-1 flex gap-2">
+                              <Button variant="outline" size="sm" className="h-7 text-xs">
+                                Volunteer
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                Learn More
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
         </div>
       </Tabs>
     </div>
-  )
+  );
 } 
