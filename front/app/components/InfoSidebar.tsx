@@ -134,14 +134,16 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
     const checkScrollable = () => {
       const container = document.querySelector('.suggestions-container');
       if (container) {
-        setIsScrollable(container.scrollHeight > container.clientHeight);
+        const isScrollableNow = container.scrollHeight > container.clientHeight;
+        setIsScrollable(isScrollableNow);
+        
         // Check if we're at the bottom
-        const isBottom = Math.abs((container.scrollHeight - container.scrollTop) - container.clientHeight) < 10;
-        setIsAtBottom(isBottom);
+        const isAtBottomNow = Math.abs((container.scrollHeight - container.scrollTop) - container.clientHeight) < 10;
+        setIsAtBottom(isAtBottomNow);
       }
     };
 
-    // Check initially and whenever suggestions change
+    // Check initially
     checkScrollable();
     
     // Add scroll event listener
@@ -150,7 +152,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
       container.addEventListener('scroll', checkScrollable);
     }
 
-    // Add resize observer to check when container size changes
+    // Add resize observer
     const resizeObserver = new ResizeObserver(checkScrollable);
     if (container) {
       resizeObserver.observe(container);
@@ -167,8 +169,13 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   const handleScrollClick = () => {
     const container = document.querySelector('.suggestions-container');
     if (container) {
-      const scrollDistance = container.clientHeight * 0.8; // Scroll 80% of the container height
-      container.scrollBy({ top: scrollDistance, behavior: 'smooth' });
+      const currentScroll = container.scrollTop;
+      const targetScroll = currentScroll + container.clientHeight * 0.8;
+      
+      container.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -181,10 +188,46 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
 
   return (
     <div
-      className={`fixed rounded-2xl right-0 top-2 z-20 w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+      className={`fixed rounded-2xl right-0 top-2 z-20 w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-out ${
         sidebarOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        @keyframes wiggle {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+          }
+          50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.5);
+          }
+        }
+
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0) translateX(-50%);
+            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+          }
+          50% {
+            transform: translateY(-15%) translateX(-50%);
+            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+          }
+        }
+        .animate-bounce {
+          animation: bounce 2s infinite;
+        }
+      `}</style>
+
       {visible && (
         <Button
           variant="ghost"
@@ -193,45 +236,50 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           <ChevronRight 
-            className={`h-5 w-5 transition-all duration-300 ease-in-out 
+            className={`h-5 w-5 transition-all duration-300 ease-out 
               ${!sidebarOpen ? "rotate-180" : ""} 
-              group-hover:scale-125 group-hover:text-orange-500
-              animate-[pulse_1.5s_ease-in-out_infinite] group-hover:animate-none`} 
+              group-hover:scale-110 group-hover:text-orange-500`} 
           />
         </Button>
       )}
 
       <Tabs defaultValue="info" onValueChange={setActiveTab}>
-        <TabsList className="sticky top-0 z-10 grid w-full grid-cols-3 bg-white rounded-t-2xl">
+        <TabsList className="sticky top-0 z-10 grid w-full grid-cols-3 bg-white rounded-t-2xl p-1">
           <TabsTrigger 
             value="info" 
-            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 
+              data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600 data-[state=active]:shadow-[0_0_20px_rgba(249,115,22,0.4)]
+              hover:scale-[1.02] active:scale-[0.98] data-[state=active]:animate-[wiggle_1s_ease-in-out_infinite]"
           >
-            <Info className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
-            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Info</span>
+            <Info className="h-4 w-4 transition-transform duration-200 data-[state=active]:scale-110" />
+            <span className="font-medium">Info</span>
           </TabsTrigger>
           <TabsTrigger 
             value="weather" 
-            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 
+              data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600 data-[state=active]:shadow-[0_0_20px_rgba(249,115,22,0.4)]
+              hover:scale-[1.02] active:scale-[0.98] data-[state=active]:animate-[wiggle_1s_ease-in-out_infinite]"
           >
-            <Cloud className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
-            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Weather</span>
+            <Cloud className="h-4 w-4 transition-transform duration-200 data-[state=active]:scale-110" />
+            <span className="font-medium">Weather</span>
           </TabsTrigger>
           <TabsTrigger 
             value="suggestions" 
-            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 
+              data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600 data-[state=active]:shadow-[0_0_20px_rgba(249,115,22,0.4)]
+              hover:scale-[1.02] active:scale-[0.98] data-[state=active]:animate-[wiggle_1s_ease-in-out_infinite]"
           >
-            <Lightbulb className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
-            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Suggestions</span>
+            <Lightbulb className="h-4 w-4 transition-transform duration-200 data-[state=active]:scale-110" />
+            <span className="font-medium">Suggestions</span>
           </TabsTrigger>
         </TabsList>
 
         <div className="p-4">
           <TabsContent 
             value="info" 
-            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+            className=" mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
           >
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden border-1 shadow-lg">
               <CardHeader className="sticky top-0 z-10 pb-2 bg-gradient-to-r from-orange-50 to-amber-50">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <div className="rounded-full bg-white p-2 shadow-sm">
@@ -324,28 +372,19 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                 )}
               </CardContent>
             </Card>
-
-            <style jsx global>{`
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-              }
-              
-              .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-            `}</style>
           </TabsContent>
 
           <TabsContent 
             value="weather" 
-            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+            className="mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
           >
-            <Card>
+            <Card className="border-1 shadow-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Cloud className="h-5 w-5 text-slate-600" />
-                  Current Weather
+                  <div className="rounded-full bg-gradient-to-r from-orange-50 to-amber-50 p-2">
+                    <Cloud className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <span>Current Weather</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -395,13 +434,15 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
 
           <TabsContent 
             value="suggestions" 
-            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+            className="mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
           >
-            <Card>
+            <Card className="border-1 shadow-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Lightbulb className="h-5 w-5 text-slate-600" />
-                  Suggestions
+                  <div className="rounded-full bg-gradient-to-r from-orange-50 to-amber-50 p-2">
+                    <Lightbulb className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <span>Suggestions</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="relative">
@@ -445,7 +486,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                               </div>
                             ) : index === visibleSuggestions.length && !allSuggestionsShown ? (
                               <div 
-                                className="rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-orange-200 transition-all duration-300"
+                                className="rounded-lg border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-orange-200 transition-all duration-300"
                                 onClick={() => {
                                   if (!isLoading) {
                                     setIsLoading(true)
@@ -483,52 +524,41 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                     </div>
                     {isScrollable && !isAtBottom && (
                       <>
-                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
                         <div 
+                          className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none -z-10 transition-opacity duration-300 ease-in-out backdrop-blur-sm"
+                          style={{ 
+                            opacity: isScrollable && !isAtBottom ? '1' : '0'
+                          }} 
+                        />
+                        <button 
                           onClick={handleScrollClick}
-                          className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center cursor-pointer group"
+                          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center cursor-pointer group z-20 transition-all duration-300 ease-in-out animate-bounce"
+                          style={{ 
+                            opacity: isScrollable && !isAtBottom ? '1' : '0',
+                            transform: `translate(-50%, ${isScrollable && !isAtBottom ? '0' : '10px'})`
+                          }}
+                          aria-label="Scroll down"
                         >
-                          <div className="animate-bounce bg-white rounded-full p-2 shadow-md transition-all duration-300 group-hover:bg-orange-50 group-hover:shadow-lg group-hover:scale-110">
-                            <svg 
-                              className="w-4 h-4 text-orange-500 transition-colors duration-300 group-hover:text-orange-600" 
-                              fill="none" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth="3" 
-                              viewBox="0 0 24 24" 
-                              stroke="currentColor"
-                            >
-                              <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                            </svg>
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-orange-200 rounded-full blur-lg opacity-25 group-hover:opacity-40 transition-opacity duration-300" />
+                            <div className="bg-white rounded-full p-2 shadow-lg transition-all duration-300 group-hover:bg-orange-50 group-hover:shadow-orange-100 relative">
+                              <svg 
+                                className="w-5 h-5 text-orange-500 transition-transform duration-300 group-hover:translate-y-0.5" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
                           </div>
-                        </div>
+                        </button>
                       </>
                     )}
                   </>
                 )}
               </CardContent>
-
-              <style jsx global>{`
-                @keyframes slideIn {
-                  from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-
-                .suggestions-container::-webkit-scrollbar {
-                  display: none;
-                }
-                
-                .suggestions-container {
-                  -ms-overflow-style: none;
-                  scrollbar-width: none;
-                }
-              `}</style>
             </Card>
           </TabsContent>
         </div>
