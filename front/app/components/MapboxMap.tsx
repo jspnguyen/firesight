@@ -1,108 +1,163 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Initialize Mapbox
-const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+
+const CITY_COORDINATES = {
+  "Davis, CA": { longitude: -121.7405, latitude: 38.5449, zoom: 13 },
+  "San Jose, CA": { longitude: -121.8863, latitude: 37.3382, zoom: 12 },
+  "Los Angeles, CA": { longitude: -118.2437, latitude: 34.0522, zoom: 11 },
+} as const;
 
 interface MapboxMapProps {
-  initialViewState?: {
-    longitude: number;
-    latitude: number;
-    zoom: number;
-  };
+  onCitySelect?: (city: string) => void;
 }
 
-export default function MapboxMap({ initialViewState = { longitude: -121.7405, latitude: 38.5449, zoom: 12 } }: MapboxMapProps) {
+export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
   const [searchInput, setSearchInput] = useState('');
-  const [lng, setLng] = useState(initialViewState.longitude);
-  const [lat, setLat] = useState(initialViewState.latitude);
-  const [zoom, setZoom] = useState(initialViewState.zoom);
-  const [mapboxgl, setMapboxgl] = useState<any>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Initialize map
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      import('mapbox-gl').then((mapbox) => {
-        setMapboxgl(mapbox.default);
-        mapbox.default.accessToken = accessToken;
-      });
-    }
-  }, []);
+    if (!mapContainer.current || map.current) return;
 
-  useEffect(() => {
-    if (!mapboxgl || !mapContainer.current || map.current) return;
-
-    map.current = new mapboxgl.Map({
+    const newMap = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [lng, lat],
-      zoom: zoom
+      center: [-119.4179, 36.7783], // California center
+      zoom: 5.5, // Good zoom level to see all of California
     });
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.current = newMap;
 
-    // Cleanup on unmount
+    // Add markers once map is loaded
+    newMap.on('load', () => {
+      Object.entries(CITY_COORDINATES).forEach(([cityName, coords]) => {
+        const marker = new mapboxgl.Marker()
+          .setLngLat([coords.longitude, coords.latitude])
+          .addTo(newMap);
+
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`<h3 class="text-sm font-semibold">${cityName}</h3>`);
+
+        marker.setPopup(popup);
+        markersRef.current.push(marker);
+
+        marker.getElement().addEventListener('click', () => {
+          navigateToCity(cityName as keyof typeof CITY_COORDINATES);
+        });
+      });
+    });
+
     return () => {
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
       if (map.current) {
         map.current.remove();
+        map.current = null;
       }
     };
-  }, [mapboxgl]);
+  }, []);
 
+  // Handle predefined city navigation
+  const navigateToCity = (cityName: keyof typeof CITY_COORDINATES) => {
+    if (!map.current) return;
+    
+    const coords = CITY_COORDINATES[cityName];
+    setSelectedCity(cityName);
+    
+    if (onCitySelect) {
+      onCitySelect(cityName);
+    }
+
+    map.current.flyTo({
+      center: [coords.longitude, coords.latitude],
+      zoom: coords.zoom,
+      duration: 2000,
+      essential: true
+    });
+  };
+
+  // Handle general location search
   const handleSearch = async () => {
-    if (!searchInput || !map.current || !mapboxgl) return;
+    if (!searchInput || !map.current) return;
 
+    const searchTerm = searchInput.toLowerCase().trim();
+
+    // First check if it's one of our predefined cities
+    const cityName = Object.keys(CITY_COORDINATES).find(city => 
+      city.toLowerCase().includes(searchTerm)
+    );
+
+    if (cityName) {
+      navigateToCity(cityName as keyof typeof CITY_COORDINATES);
+      setSearchInput('');
+      return;
+    }
+
+    // If not a predefined city, search using Mapbox Geocoding API
+    setIsLoading(true);
     try {
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           searchInput
-        )}.json?access_token=${accessToken}&limit=1`
+        )}.json?access_token=${mapboxgl.accessToken}&limit=1`
       );
       const data = await response.json();
 
       if (data.features && data.features.length > 0) {
         const [longitude, latitude] = data.features[0].center;
+        const placeName = data.features[0].place_name;
+
+        // Clear previous selection since this is not a predefined city
+        setSelectedCity(null);
         
+        if (onCitySelect) {
+          onCitySelect(placeName);
+        }
+
         map.current.flyTo({
           center: [longitude, latitude],
-          zoom: 14
+          zoom: 13, // Default zoom level for non-predefined locations
+          duration: 2000,
+          essential: true
         });
 
-        // Remove existing markers
-        const markers = document.getElementsByClassName('mapboxgl-marker');
-        Array.from(markers).forEach(marker => marker.remove());
-
-        // Add new marker
-        new mapboxgl.Marker()
-          .setLngLat([longitude, latitude])
-          .addTo(map.current);
+        setSearchInput('');
       }
     } catch (error) {
       console.error('Error searching location:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative w-full h-[600px]">
-      <div className="absolute top-4 left-4 z-10 w-96 bg-white rounded-lg shadow-lg p-2">
-        <div className="flex gap-2">
+    <div className="relative w-full h-full">
+      <div className="absolute top-4 left-4 z-10 w-96">
+        <div className="flex gap-2 bg-white rounded-lg shadow-lg p-2">
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Search for a location..."
+            placeholder="Search for any location..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           />
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
+            disabled={isLoading}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Search
+            {isLoading ? 'Searching...' : 'Search'}
           </button>
         </div>
       </div>
