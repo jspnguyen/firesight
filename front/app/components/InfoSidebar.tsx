@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Info, Cloud, Lightbulb, ChevronRight, Loader2, Sun, CloudSun, Moon, CloudRain, CloudSnow, CloudLightning, Wind as WindIcon, Droplets, ArrowUp, ArrowDown } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Info, Cloud, Lightbulb, ChevronRight, Loader2, Sun, CloudSun, Moon, CloudRain, CloudSnow, CloudLightning, Wind as WindIcon, Droplets, ArrowUp, ArrowDown, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import demographicData from "./result/demographic_results.json"
 import suggestionsData from "./result/suggestions_results.json"
 import { motion } from "framer-motion"
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 // Map of cities to their corresponding counties
 const cityToCountyMap = {
@@ -108,6 +110,8 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
   const [weatherLoading, setWeatherLoading] = useState(false)
   const [weatherError, setWeatherError] = useState<string | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const infoContentRef = useRef<HTMLDivElement>(null)
   
   // Check if the selected city is one of our predefined cities
   const isKnownCity = selectedCity && Object.keys(cityToCountyMap).includes(selectedCity);
@@ -256,6 +260,82 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
 
     fetchWeatherData()
   }, [countyName])
+
+  const handleDownloadPDF = async () => {
+    if (!countyName || !countyData) return;
+    
+    setIsDownloading(true);
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      let yPosition = 20;
+      const lineHeight = 7;
+      const margin = 20;
+      
+      // Helper function to add text with proper line breaks
+      const addText = (text: string, fontSize = 12, isBold = false) => {
+        pdf.setFontSize(fontSize);
+        pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+        pdf.text(text, margin, yPosition);
+        yPosition += lineHeight;
+      };
+      
+      // Add header
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${countyName} County Information`, margin, yPosition);
+      yPosition += lineHeight * 2;
+      
+      // Add race distribution
+      addText('Race Distribution', 16, true);
+      if (raceData) {
+        raceData.forEach((race, index) => {
+          addText(`${index + 1}. ${race.name}: ${race.percentage}`);
+        });
+      }
+      yPosition += lineHeight;
+      
+      // Add key statistics
+      addText('Key Statistics', 16, true);
+      addText(`Population: ${countyData.total_pop.toLocaleString()}`);
+      addText(`Median Income: $${countyData.median_income.toLocaleString()}`);
+      addText(`Average Household Size: ${countyData.avg_household_size} people`);
+      addText(`Poverty Rate: ${countyData.poverty_pct}%`);
+      addText(`Homeless Population: ${countyData.total_homeless.toLocaleString()}`);
+      yPosition += lineHeight;
+      
+      // Add additional metrics
+      addText('Additional Metrics', 16, true);
+      addText(`Limited English Proficiency: ${countyData.eng_less_than_very_well_pct}%`);
+      addText(`Social Vulnerability Index: ${countyData.svi.toFixed(2)}`);
+      
+      // Add weather data if available
+      if (weatherData) {
+        yPosition += lineHeight;
+        addText('Current Weather', 16, true);
+        addText(`Temperature: ${formatTemperature(weatherData.current_temp)}`);
+        addText(`Feels Like: ${formatTemperature(weatherData.feels_like)}`);
+        addText(`Humidity: ${Math.round(weatherData.humidity)}%`);
+        addText(`Wind: ${weatherData.wind_max} km/h`);
+        addText(`Precipitation: ${weatherData.precip} mm`);
+      }
+      
+      // Add suggestions if available
+      if (countySuggestions) {
+        yPosition += lineHeight;
+        addText('Recommendations', 16, true);
+        countySuggestions.forEach((suggestion, index) => {
+          addText(`${index + 1}. ${suggestion[0]}`);
+        });
+      }
+      
+      pdf.save(`${countyName}_County_Info.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const renderNoDataMessage = () => (
     <div className="p-4 text-center text-slate-500">
@@ -518,21 +598,41 @@ export default function InfoSidebar({ selectedCity, visible = false, onTakeActio
         <div className="p-4">
           <TabsContent 
             value="info" 
-            className=" mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+            className="mt-0 transform transition-all duration-200 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
           >
             <Card className="overflow-hidden border-1 shadow-lg">
               <CardHeader className="sticky top-0 z-10 pb-2 bg-gradient-to-r from-orange-50 to-amber-50">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="rounded-full bg-white p-2 shadow-sm">
-                    <Info className="h-5 w-5 text-orange-500" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-slate-700">{selectedCity || "Location"}</span>
-                    <span className="text-sm font-normal text-slate-500">{countyName ? `${countyName} County` : "Select a location"}</span>
-                  </div>
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <div className="rounded-full bg-white p-2 shadow-sm">
+                      <Info className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-slate-700">{selectedCity || "Location"}</span>
+                      <span className="text-sm font-normal text-slate-500">{countyName ? `${countyName} County` : "Select a location"}</span>
+                    </div>
+                  </CardTitle>
+                  {isKnownCity && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full bg-white hover:bg-orange-50 transition-colors duration-300"
+                      onClick={handleDownloadPDF}
+                      disabled={isDownloading}
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+                      ) : (
+                        <Download className="h-5 w-5 text-orange-500" />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+              <CardContent 
+                ref={infoContentRef}
+                className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide"
+              >
                 {!isKnownCity ? renderNoDataMessage() : (
                   <div className="space-y-6">
                     {/* Race Distribution Section */}
