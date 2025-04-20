@@ -5,72 +5,54 @@ import { Info, Cloud, Lightbulb, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import demographicData from "./result/demographic_results.json"
+import weatherData from "./result/weather_results.json"
+import suggestionsData from "./result/suggestions_results.json"
 
-const cityData = {
-  "Davis, CA": {
-    languages: [
-      { name: "English", percentage: "75.5%" },
-      { name: "Chinese", percentage: "12.5%" },
-      { name: "Spanish", percentage: "8%" },
-    ],
-    demographics: {
-      population: "69,413",
-      averageMedian: "$67,426",
-      avgHouseholdAge: "25.7 years",
-      fireStationPersonnel: "45 personnel",
-    },
-    weather: {
-      temperature: "75°F",
-      condition: "Sunny",
-      wind: "8 mph",
-      direction: "NW",
-      gust: "15 mph",
-      humidity: "45%",
-    },
-  },
-  "San Jose, CA": {
-    languages: [
-      { name: "English", percentage: "43%" },
-      { name: "Spanish", percentage: "23.5%" },
-      { name: "Vietnamese", percentage: "10.8%" },
-    ],
-    demographics: {
-      population: "1,013,240",
-      averageMedian: "$117,324",
-      avgHouseholdAge: "36.5 years",
-      fireStationPersonnel: "650 personnel",
-    },
-    weather: {
-      temperature: "70°F",
-      condition: "Partly Cloudy",
-      wind: "12 mph",
-      direction: "W",
-      gust: "20 mph",
-      humidity: "62%",
-    },
-  },
-  "Los Angeles, CA": {
-    languages: [
-      { name: "English", percentage: "40%" },
-      { name: "Spanish", percentage: "42%" },
-      { name: "Chinese", percentage: "2.4%" },
-    ],
-    demographics: {
-      population: "3,898,747",
-      averageMedian: "$65,290",
-      avgHouseholdAge: "35.8 years",
-      fireStationPersonnel: "3,435 personnel",
-    },
-    weather: {
-      temperature: "72°F",
-      condition: "Clear",
-      wind: "7 mph",
-      direction: "SW",
-      gust: "12 mph",
-      humidity: "58%",
-    },
-  },
+// Map of cities to their corresponding counties
+const cityToCountyMap = {
+  "Davis, CA": "Yolo",
+  "San Jose, CA": "Santa Clara", // Note: Santa Clara is not in our JSON, will need to handle this
+  "Los Angeles, CA": "Los Angeles",
 }
+
+// Language data (still hardcoded as it's not in the JSON)
+const languageData = {
+  "Davis, CA": [
+    { name: "English", percentage: "75.5%" },
+    { name: "Chinese", percentage: "12.5%" },
+    { name: "Spanish", percentage: "8%" },
+  ],
+  "San Jose, CA": [
+    { name: "English", percentage: "43%" },
+    { name: "Spanish", percentage: "23.5%" },
+    { name: "Vietnamese", percentage: "10.8%" },
+  ],
+  "Los Angeles, CA": [
+    { name: "English", percentage: "40%" },
+    { name: "Spanish", percentage: "42%" },
+    { name: "Chinese", percentage: "2.4%" },
+  ],
+}
+
+// Weather condition mapping based on temperature and precipitation
+const getWeatherCondition = (temp: number, precip: number) => {
+  if (precip > 0) return "Rainy"
+  if (temp > 25) return "Hot"
+  if (temp > 20) return "Sunny"
+  if (temp > 15) return "Partly Cloudy"
+  if (temp > 10) return "Cloudy"
+  return "Cold"
+}
+
+// Default suggestions in case the county data is not available
+const defaultSuggestions = [
+  "Increase emergency response training",
+  "Enhance community outreach programs",
+  "Improve multilingual communication",
+  "Boost volunteer recruitment",
+  "Expand disaster preparedness education"
+]
 
 interface InfoSidebarProps {
   selectedCity: string;
@@ -79,7 +61,23 @@ interface InfoSidebarProps {
 
 export default function InfoSidebar({ selectedCity = "Davis, CA", visible = false }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const city = cityData[selectedCity as keyof typeof cityData]
+  
+  // Get the county name for the selected city
+  const countyName = cityToCountyMap[selectedCity as keyof typeof cityToCountyMap]
+  
+  // Get the demographic data for the county
+  const countyData = countyName ? demographicData[countyName as keyof typeof demographicData] : null
+  
+  // Get the weather data for the county
+  const countyWeather = countyName ? weatherData[countyName as keyof typeof weatherData] : null
+  
+  // Get the suggestions data for the county, with fallback to default suggestions
+  const countySuggestions = countyName && suggestionsData[countyName as keyof typeof suggestionsData] 
+    ? suggestionsData[countyName as keyof typeof suggestionsData] 
+    : defaultSuggestions
+  
+  // Get the language data for the selected city
+  const languages = languageData[selectedCity as keyof typeof languageData]
 
   useEffect(() => {
     if (visible) {
@@ -88,30 +86,6 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
       setSidebarOpen(false);
     }
   }, [visible]);
-
-  const suggestions = {
-    "Davis, CA": [
-      "Need additional Chinese translators for emergency communications",
-      "Need student volunteer coordinators",
-      "Need emergency response training for campus areas",
-      "Need bike evacuation route coordinators",
-      "Need community outreach for student housing areas",
-    ],
-    "San Jose, CA": [
-      "Need additional Vietnamese translators",
-      "Need tech industry emergency coordinators",
-      "Need volunteer firefighters",
-      "Need emergency response training in tech campuses",
-      "Need community outreach in diverse neighborhoods",
-    ],
-    "Los Angeles, CA": [
-      "Need additional Spanish translators",
-      "Need traffic evacuation coordinators",
-      "Need emergency response training in entertainment venues",
-      "Need wildfire preparedness coordinators",
-      "Need community outreach in dense urban areas",
-    ],
-  }
 
   return (
     <div
@@ -177,7 +151,7 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
                   <div>
                     <h3 className="font-medium text-slate-700">Languages</h3>
                     <ul className="mt-1 space-y-1 pl-5 text-sm">
-                      {city.languages.map((lang, index) => (
+                      {languages.map((lang, index) => (
                         <li key={index} className="flex items-center justify-between">
                           <span>#{index + 1}: {lang.name}</span>
                           <span className="font-medium text-slate-700">{lang.percentage}</span>
@@ -189,19 +163,27 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <h3 className="text-sm font-medium text-slate-500">Population</h3>
-                      <p className="font-medium text-slate-800">{city.demographics.population}</p>
+                      <p className="font-medium text-slate-800">{countyData ? countyData.total_pop.toLocaleString() : "N/A"}</p>
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Average Median</h3>
-                      <p className="font-medium text-slate-800">{city.demographics.averageMedian}</p>
+                      <h3 className="text-sm font-medium text-slate-500">Median Income</h3>
+                      <p className="font-medium text-slate-800">{countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A"}</p>
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Avg. Household Age</h3>
-                      <p className="font-medium text-slate-800">{city.demographics.avgHouseholdAge}</p>
+                      <h3 className="text-sm font-medium text-slate-500">Avg. Household Size</h3>
+                      <p className="font-medium text-slate-800">{countyData ? `${countyData.avg_household_size} people` : "N/A"}</p>
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Fire Station Personnel</h3>
-                      <p className="font-medium text-slate-800">{city.demographics.fireStationPersonnel}</p>
+                      <h3 className="text-sm font-medium text-slate-500">Poverty Rate</h3>
+                      <p className="font-medium text-slate-800">{countyData ? `${countyData.poverty_pct}%` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Limited English</h3>
+                      <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_limited_pct}%` : "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Social Vulnerability</h3>
+                      <p className="font-medium text-slate-800">{countyData ? countyData.svi.toFixed(2) : "N/A"}</p>
                     </div>
                   </div>
                 </div>
@@ -225,26 +207,38 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
                   <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
                     <div className="flex flex-col items-center">
                       <Cloud className="h-12 w-12 text-slate-600" />
-                      <span className="mt-2 text-3xl font-bold">{city.weather.temperature}</span>
-                      <span className="text-sm text-slate-500">{city.weather.condition}</span>
+                      <span className="mt-2 text-3xl font-bold">
+                        {countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}
+                      </span>
+                      <span className="text-sm text-slate-500">
+                        {countyWeather ? getWeatherCondition(countyWeather.t_max, countyWeather.precip) : "N/A"}
+                      </span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                    <p className="font-medium text-slate-800">{city.weather.wind}</p>
+                    <h3 className="text-sm font-medium text-slate-500">High</h3>
+                    <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_max)}°C` : "N/A"}</p>
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Direction</h3>
-                    <p className="font-medium text-slate-800">{city.weather.direction}</p>
+                    <h3 className="text-sm font-medium text-slate-500">Low</h3>
+                    <p className="font-medium text-slate-800">{countyWeather ? `${Math.round(countyWeather.t_min)}°C` : "N/A"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Wind</h3>
+                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.wind_max} km/h` : "N/A"}</p>
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                    <p className="font-medium text-slate-800">{city.weather.gust}</p>
+                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.gust_max} km/h` : "N/A"}</p>
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
-                    <p className="font-medium text-slate-800">{city.weather.humidity}</p>
+                    <h3 className="text-sm font-medium text-slate-500">Precipitation</h3>
+                    <p className="font-medium text-slate-800">{countyWeather ? `${countyWeather.precip} mm` : "N/A"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Date</h3>
+                    <p className="font-medium text-slate-800">{countyWeather ? countyWeather.date : "N/A"}</p>
                   </div>
                 </div>
               </CardContent>
@@ -264,7 +258,7 @@ export default function InfoSidebar({ selectedCity = "Davis, CA", visible = fals
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {suggestions[selectedCity as keyof typeof suggestions].map((suggestion, index) => (
+                  {countySuggestions.map((suggestion, index) => (
                     <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 rounded-full bg-amber-100 p-1">
