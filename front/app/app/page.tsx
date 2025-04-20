@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import MapboxMap from '../components/MapboxMap';
-import InfoSidebar from '../components/InfoSidebar';
 import WelcomePage from '../components/WelcomePage';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -30,9 +29,6 @@ export default function Home() {
           >
             <div className="absolute inset-0">
               <MapboxMap onCitySelect={handleCitySelect} />
-            </div>
-            <div className="absolute right-0 top-0 h-full">
-              <InfoSidebar selectedCity={selectedCity} />
             </div>
           </motion.div>
         )}

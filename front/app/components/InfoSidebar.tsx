@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Info, Cloud, Lightbulb, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -74,11 +74,20 @@ const cityData = {
 
 interface InfoSidebarProps {
   selectedCity: string;
+  visible: boolean;
 }
 
-export default function InfoSidebar({ selectedCity = "Davis, CA" }: InfoSidebarProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+export default function InfoSidebar({ selectedCity = "Davis, CA", visible = false }: InfoSidebarProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const city = cityData[selectedCity as keyof typeof cityData]
+
+  useEffect(() => {
+    if (visible) {
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+    }
+  }, [visible]);
 
   const suggestions = {
     "Davis, CA": [
@@ -106,156 +115,179 @@ export default function InfoSidebar({ selectedCity = "Davis, CA" }: InfoSidebarP
 
   return (
     <div
-      className={`fixed right-0 top-0 z-20 h-auto min-h-screen w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+      className={`fixed rounded-2xl right-0 top-2 z-20 w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
         sidebarOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute -left-10 top-4 hidden rounded-l-md rounded-r-none bg-white shadow-md md:flex"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        <ChevronRight className={`h-5 w-5 transition-transform ${sidebarOpen ? "rotate-180" : ""}`} />
-      </Button>
+      {visible && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute -left-10 top-4 hidden rounded-l-md rounded-r-none bg-white shadow-md transition-all duration-300 hover:bg-orange-50 hover:shadow-orange-100 md:flex group"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <ChevronRight 
+            className={`h-5 w-5 transition-all duration-300 ease-in-out 
+              ${!sidebarOpen ? "rotate-180" : ""} 
+              group-hover:scale-125 group-hover:text-orange-500
+              animate-[pulse_1.5s_ease-in-out_infinite] group-hover:animate-none`} 
+          />
+        </Button>
+      )}
 
-      <Tabs defaultValue="info" className="flex h-full min-h-screen flex-col">
-        <TabsList className="sticky top-0 z-10 grid w-full grid-cols-3 bg-white">
-          <TabsTrigger value="info" className="flex items-center gap-1">
-            <Info className="h-4 w-4" />
-            <span>Info</span>
+      <Tabs defaultValue="info">
+        <TabsList className="sticky top-0 z-10 grid w-full grid-cols-3 bg-white rounded-t-2xl">
+          <TabsTrigger 
+            value="info" 
+            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+          >
+            <Info className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
+            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Info</span>
           </TabsTrigger>
-          <TabsTrigger value="weather" className="flex items-center gap-1">
-            <Cloud className="h-4 w-4" />
-            <span>Weather</span>
+          <TabsTrigger 
+            value="weather" 
+            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+          >
+            <Cloud className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
+            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Weather</span>
           </TabsTrigger>
-          <TabsTrigger value="suggestions" className="flex items-center gap-1">
-            <Lightbulb className="h-4 w-4" />
-            <span>Suggestions</span>
+          <TabsTrigger 
+            value="suggestions" 
+            className="flex items-center gap-1 transition-all duration-300 hover:bg-slate-50"
+          >
+            <Lightbulb className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:text-orange-500 group-hover:scale-110" />
+            <span className="transition-colors duration-300 group-data-[state=active]:text-orange-500">Suggestions</span>
           </TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="h-full p-4">
-            <TabsContent value="info" className="mt-0 h-full">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Info className="h-5 w-5 text-slate-600" />
-                    {selectedCity} Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-medium text-slate-700">Languages</h3>
-                      <ul className="mt-1 space-y-1 pl-5 text-sm">
-                        {city.languages.map((lang, index) => (
-                          <li key={index} className="flex items-center justify-between">
-                            <span>#{index + 1}: {lang.name}</span>
-                            <span className="font-medium text-slate-700">{lang.percentage}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+        <div className="p-4">
+          <TabsContent 
+            value="info" 
+            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+          >
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Info className="h-5 w-5 text-slate-600" />
+                  {selectedCity} Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-slate-700">Languages</h3>
+                    <ul className="mt-1 space-y-1 pl-5 text-sm">
+                      {city.languages.map((lang, index) => (
+                        <li key={index} className="flex items-center justify-between">
+                          <span>#{index + 1}: {lang.name}</span>
+                          <span className="font-medium text-slate-700">{lang.percentage}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Population</h3>
-                        <p className="font-medium text-slate-800">{city.demographics.population}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Average Median</h3>
-                        <p className="font-medium text-slate-800">{city.demographics.averageMedian}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Avg. Household Age</h3>
-                        <p className="font-medium text-slate-800">{city.demographics.avgHouseholdAge}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Fire Station Personnel</h3>
-                        <p className="font-medium text-slate-800">{city.demographics.fireStationPersonnel}</p>
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Population</h3>
+                      <p className="font-medium text-slate-800">{city.demographics.population}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Average Median</h3>
+                      <p className="font-medium text-slate-800">{city.demographics.averageMedian}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Avg. Household Age</h3>
+                      <p className="font-medium text-slate-800">{city.demographics.avgHouseholdAge}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Fire Station Personnel</h3>
+                      <p className="font-medium text-slate-800">{city.demographics.fireStationPersonnel}</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="weather" className="mt-0 h-full">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Cloud className="h-5 w-5 text-slate-600" />
-                    Current Weather
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
-                      <div className="flex flex-col items-center">
-                        <Cloud className="h-12 w-12 text-slate-600" />
-                        <span className="mt-2 text-3xl font-bold">{city.weather.temperature}</span>
-                        <span className="text-sm text-slate-500">{city.weather.condition}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                      <p className="font-medium text-slate-800">{city.weather.wind}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Direction</h3>
-                      <p className="font-medium text-slate-800">{city.weather.direction}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                      <p className="font-medium text-slate-800">{city.weather.gust}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
-                      <p className="font-medium text-slate-800">{city.weather.humidity}</p>
+          <TabsContent 
+            value="weather" 
+            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+          >
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Cloud className="h-5 w-5 text-slate-600" />
+                  Current Weather
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
+                    <div className="flex flex-col items-center">
+                      <Cloud className="h-12 w-12 text-slate-600" />
+                      <span className="mt-2 text-3xl font-bold">{city.weather.temperature}</span>
+                      <span className="text-sm text-slate-500">{city.weather.condition}</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="suggestions" className="mt-0 h-full">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Lightbulb className="h-5 w-5 text-slate-600" />
-                    Suggestions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {suggestions[selectedCity as keyof typeof suggestions].map((suggestion, index) => (
-                      <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5 rounded-full bg-amber-100 p-1">
-                            <Lightbulb className="h-4 w-4 text-amber-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-slate-800">{suggestion}</p>
-                            <div className="mt-1 flex gap-2">
-                              <Button variant="outline" size="sm" className="h-7 text-xs">
-                                Volunteer
-                              </Button>
-                              <Button variant="ghost" size="sm" className="h-7 text-xs">
-                                Learn More
-                              </Button>
-                            </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Wind</h3>
+                    <p className="font-medium text-slate-800">{city.weather.wind}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Direction</h3>
+                    <p className="font-medium text-slate-800">{city.weather.direction}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Gust</h3>
+                    <p className="font-medium text-slate-800">{city.weather.gust}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
+                    <p className="font-medium text-slate-800">{city.weather.humidity}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent 
+            value="suggestions" 
+            className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
+          >
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Lightbulb className="h-5 w-5 text-slate-600" />
+                  Suggestions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {suggestions[selectedCity as keyof typeof suggestions].map((suggestion, index) => (
+                    <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 rounded-full bg-amber-100 p-1">
+                          <Lightbulb className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-800">{suggestion}</p>
+                          <div className="mt-1 flex gap-2">
+                            <Button variant="outline" size="sm" className="h-7 text-xs">
+                              Volunteer
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 text-xs">
+                              Learn More
+                            </Button>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </div>
       </Tabs>
     </div>
