@@ -57,14 +57,19 @@ def generate_suggestions(data: Dict, county: str = None) -> List[str]:
     for how the state can create analytics opportunities and solutions to support data-driven, 
     culturally and demographically sensitive fire recovery, response, and survivor support. SVI is the Social Vulnerability Index.
     
-    Each suggestion should be a one-sentence recommendation for an analytics solution or opportunity
-    that addresses the unique demographic challenges shown in the data.
+    Each suggestion MUST be under 7 words and should be a simple, actionable recommendation.
+    Examples of good suggestions:
+    - "Ensure enough Spanish translators"
+    - "Increase firefighter staffing levels"
+    - "Add mobile clinics in rural areas"
+    - "Provide multilingual emergency alerts"
+    - "Expand elderly evacuation assistance"
 
     Data:
     {analysis}
 
-    Please provide concrete, specific suggestions that address the unique demographic challenges shown in the data.
-    Focus on practical, implementable analytics solutions that consider the different characteristics of the county.
+    Please provide ONLY short, simple suggestions that address the unique demographic challenges shown in the data.
+    Each suggestion must be under 7 words.
     Return ONLY the list of suggestions in Python list format, with each suggestion as a string."""
 
     response = client.chat.completions.create(
@@ -97,6 +102,13 @@ def generate_suggestions(data: Dict, county: str = None) -> List[str]:
     
     return suggestions
 
+def save_suggestions_to_json(suggestions_by_county: Dict[str, List[str]], filename: str = 'suggestions_results.json'):
+    """Save suggestions to a JSON file in the results folder."""
+    output_path = os.path.join('backend/result', filename)
+    with open(output_path, 'w') as f:
+        json.dump(suggestions_by_county, f, indent=4)
+    print(f"\nSuggestions saved to {output_path}")
+
 def main():
     # Load demographic data
     data = load_demographic_data()
@@ -104,13 +116,20 @@ def main():
     # Get list of counties
     counties = list(data.keys())
     
+    # Dictionary to store suggestions for all counties
+    suggestions_by_county = {}
+    
     # Generate suggestions for each county
     for county in counties:
         print(f"\nAnalytics Recommendations for {county} County:\n")
         suggestions = generate_suggestions(data, county)
+        suggestions_by_county[county] = suggestions
         for i, suggestion in enumerate(suggestions, 1):
             print(f"{i}. {suggestion}")
         print("\n" + "-"*80)
+    
+    # Save all suggestions to a JSON file
+    save_suggestions_to_json(suggestions_by_county)
 
 if __name__ == "__main__":
     main()

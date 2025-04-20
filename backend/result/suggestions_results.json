@@ -1,0 +1,48 @@
+{
+    "Yolo": [
+        "Increase broadband access",
+        "Enhance elderly healthcare services",
+        "Improve child crisis services",
+        "Boost health insurance coverage",
+        "Expand Asian language resources",
+        "Increase poverty alleviation programs",
+        "Enhance hispanic community engagement",
+        "Offer driver safety programs",
+        "Raise high school graduation rates"
+    ],
+    "Shasta": [
+        "Increase elderly care facilities",
+        "Boost rural broadband access",
+        "Expand youth disaster education",
+        "Ensure Indigenous language emergency alerts",
+        "Improve access to health insurance",
+        "Address poverty in disaster recovery",
+        "Add Asian language translators",
+        "Increase disaster support for low-income households",
+        "Enhance solitary driver alert systems",
+        "Ensure Spanish language emergency alerts",
+        "Prioritize SVI in recovery strategies"
+    ],
+    "Los Angeles": [
+        "Increase elderly support services",
+        "Boost youth disaster education programs",
+        "Invest in Spanish language resources",
+        "Enhance broadband connectivity",
+        "Promote carpooling during evacuations",
+        "Improve access to healthcare",
+        "Expand poverty alleviation programs",
+        "Promote multilingual disaster awareness",
+        "Prioritize areas with high SVI"
+    ],
+    "Monterey": [
+        "Increase elderly care facilities",
+        "Boost child disaster education programs",
+        "Improve broadband connectivity",
+        "Promote carpooling initiatives",
+        "Raise health insurance awareness",
+        "Amplify poverty alleviation programs",
+        "Enhance multilingual emergency communication",
+        "Enhance support for non-English speakers",
+        "Address high SVI with targeted aid"
+    ]
+}
