@@ -7,7 +7,7 @@ import InfoSidebar from './InfoSidebar';
 import type { Feature, Polygon } from 'geojson';
 import weatherData from './result/weather_results.json';
 import demographicData from './result/demographic_results.json';
-import { Camera, X, Save, Mail } from 'lucide-react';
+import { Camera, ChevronLeft, Save, Mail, Loader2, X } from 'lucide-react';
 
 // Initialize Mapbox
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -656,75 +656,104 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
   return (
     <div className="relative w-full h-full">
       <div className="absolute top-4 left-4 z-10">
-        <div 
-          className={`flex gap-2 transition-all duration-300 origin-left
-            ${isCollapsed ? 'scale-90' : 'scale-100'}
-            ${isCollapsed ? 'w-14 p-1 bg-transparent' : 'w-96 p-2 bg-white rounded-lg shadow-lg'}`}
-        >
-          {!isCollapsed ? (
-            <>
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Search for any location..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-all duration-300 bg-white"
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className={`px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300`}
-              >
-                {isLoading ? 'Searching...' : 'Search'}
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                setIsCollapsed(false);
-                setShowInfoSidebar(false);
-              }}
-              className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-xl hover:bg-blue-600 focus:outline-none transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl group"
-            >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+        <div className="flex gap-2">
+          <div 
+            className={`flex items-center transition-all duration-300 ease-out
+              ${isCollapsed ? 'w-12 scale-95' : 'w-[400px] bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-gray-100'}
+              ${isCollapsed ? '' : 'px-4 py-2'}`}
+          >
+            {!isCollapsed ? (
+              <>
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search for any location..."
+                  className="flex-1 bg-transparent text-slate-600 placeholder:text-slate-400 focus:outline-none"
+                  disabled={isLoading}
                 />
-              </svg>
+                <div className="flex items-center gap-2 ml-2">
+                  <button
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className={`text-slate-600 text-base font-medium focus:outline-none disabled:text-slate-300 
+                      transition-all duration-300 relative group overflow-hidden
+                      ${searchInput ? 'px-4 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0' : 'hover:text-orange-500'}`}
+                  >
+                    {isLoading ? (
+                      'Searching...'
+                    ) : (
+                      <>
+                        <span className={`relative z-10 ${searchInput ? 'animate-pulse' : ''}`}>Search</span>
+                        {searchInput && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                        )}
+                      </>
+                    )}
+                  </button>
+                  <div className="w-px h-4 bg-slate-200"/>
+                  <button
+                    onClick={() => setIsCollapsed(true)}
+                    className="text-slate-400 hover:text-orange-500 focus:outline-none 
+                      transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsCollapsed(false);
+                  setShowInfoSidebar(false);
+                }}
+                className="w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg 
+                  transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-lg group"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-5 w-5 text-slate-400 transition-colors duration-200 group-hover:text-orange-500" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          {isCollapsed && (
+            <button
+              onClick={takeScreenshot}
+              disabled={isCapturingScreenshot}
+              className="w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg 
+                transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-lg group
+                disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCapturingScreenshot ? (
+                <Loader2 className="h-5 w-5 text-slate-400 animate-spin" />
+              ) : (
+                <Camera 
+                  className="h-5 w-5 text-slate-400 transition-colors duration-200 group-hover:text-orange-500" 
+                />
+              )}
             </button>
           )}
         </div>
       </div>
       
-      {/* Screenshot Button */}
-      <div className="absolute bottom-4 left-4 z-10">
-        <button
-          onClick={takeScreenshot}
-          disabled={isCapturingScreenshot}
-          className={`w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-xl hover:bg-blue-600 focus:outline-none transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl group ${isCapturingScreenshot ? 'opacity-70 cursor-not-allowed' : ''}`}
-        >
-          {isCapturingScreenshot ? (
-            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : (
-            <Camera className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
-          )}
-        </button>
+      <div ref={mapContainer} className="w-full h-full" />
+      <div className="absolute right-0 top-0 h-full">
+        <InfoSidebar selectedCity={selectedCity || "Location"} visible={showInfoSidebar} />
       </div>
-      
+
       {/* Screenshot Popup */}
       {showScreenshotPopup && (
         <div className="fixed inset-0 bg-transparent backdrop-blur-[2px] flex items-center justify-center z-50">
@@ -769,11 +798,6 @@ export default function MapboxMap({ onCitySelect }: MapboxMapProps) {
           </div>
         </div>
       )}
-      
-      <div ref={mapContainer} className="w-full h-full" />
-      <div className="absolute right-0 top-0 h-full">
-        <InfoSidebar selectedCity={selectedCity || "Location"} visible={showInfoSidebar} />
-      </div>
     </div>
   );
 } 

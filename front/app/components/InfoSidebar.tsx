@@ -43,6 +43,11 @@ interface InfoSidebarProps {
   visible: boolean;
 }
 
+interface RaceData {
+  name: string;
+  percentage: string;
+}
+
 export default function InfoSidebar({ selectedCity, visible = false }: InfoSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [visibleSuggestions, setVisibleSuggestions] = useState<number[]>([])
@@ -71,10 +76,16 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
   
   // Get the race data from the demographic data
   const raceData = countyData?.top_3_race ? 
-    Object.entries(countyData.top_3_race).map(([name, percentage]) => ({
-      name,
-      percentage: `${percentage}%`
-    })) : 
+    Object.entries(countyData.top_3_race)
+      .map(([name, percentage]) => ({
+        name,
+        percentage: `${percentage}%`
+      }))
+      .sort((a, b) => {
+        const aPercent = parseFloat(a.percentage.replace('%', ''));
+        const bPercent = parseFloat(b.percentage.replace('%', ''));
+        return bPercent - aPercent;
+      }) : 
     null;
 
   // Reset states when location changes
@@ -220,58 +231,110 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
             value="info" 
             className="mt-0 transform transition-all duration-300 data-[state=inactive]:opacity-0 data-[state=active]:animate-in data-[state=inactive]:animate-out"
           >
-            <Card>
-              <CardHeader className="pb-2">
+            <Card className="overflow-hidden">
+              <CardHeader className="sticky top-0 z-10 pb-2 bg-gradient-to-r from-orange-50 to-amber-50">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Info className="h-5 w-5 text-slate-600" />
-                  {selectedCity || "Location"}
+                  <div className="rounded-full bg-white p-2 shadow-sm">
+                    <Info className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-slate-700">{selectedCity || "Location"}</span>
+                    <span className="text-sm font-normal text-slate-500">{countyName ? `${countyName} County` : "Select a location"}</span>
+                  </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
                 {!isKnownCity ? renderNoDataMessage() : (
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-medium text-slate-700">Top 3 Races</h3>
-                      <ul className="mt-1 space-y-1 pl-5 text-sm">
+                  <div className="space-y-6">
+                    {/* Race Distribution Section */}
+                    <div className="space-y-3">
+                      <h3 className="font-medium text-slate-700 flex items-center gap-2 mt-3">
+                        <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                        Top 3 Races
+                      </h3>
+                      <div className="space-y-2">
                         {raceData?.map((race, index) => (
-                          <li key={index} className="flex items-center justify-between">
-                            <span>#{index + 1}: {race.name}</span>
-                            <span className="font-medium text-slate-700">{race.percentage}</span>
-                          </li>
+                          <div 
+                            key={index} 
+                            className="group relative overflow-hidden rounded-lg bg-slate-50 p-3 transition-all duration-300 hover:bg-orange-50"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-medium text-slate-700 shadow-sm">
+                                  {index + 1}
+                                </div>
+                                <span className="font-medium text-slate-800">{race.name}</span>
+                              </div>
+                              <span className="font-semibold text-orange-600">{race.percentage}</span>
+                            </div>
+                            <div 
+                              className="absolute bottom-0 left-0 h-1 bg-orange-200 transition-all duration-300 group-hover:bg-orange-400"
+                              style={{ width: race.percentage }}
+                            />
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Population</h3>
-                        <p className="font-medium text-slate-800">{countyData ? countyData.total_pop.toLocaleString() : "N/A"}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Median Income</h3>
-                        <p className="font-medium text-slate-800">{countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A"}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Avg. Household Size</h3>
-                        <p className="font-medium text-slate-800">{countyData ? `${countyData.avg_household_size} people` : "N/A"}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Poverty Rate</h3>
-                        <p className="font-medium text-slate-800">{countyData ? `${countyData.poverty_pct}%` : "N/A"}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Limited English</h3>
-                        <p className="font-medium text-slate-800">{countyData ? `${countyData.eng_less_than_very_well_pct}%` : "N/A"}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-slate-500">Social Vulnerability</h3>
-                        <p className="font-medium text-slate-800">{countyData ? countyData.svi.toFixed(2) : "N/A"}</p>
+                    {/* Key Statistics Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: "Population", value: countyData?.total_pop.toLocaleString() },
+                        { label: "Median Income", value: countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A" },
+                        { label: "Avg. Household Size", value: countyData ? `${countyData.avg_household_size} people` : "N/A" },
+                        { label: "Poverty Rate", value: countyData ? `${countyData.poverty_pct}%` : "N/A" }
+                      ].map((stat, index) => (
+                        <div 
+                          key={index}
+                          className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:from-orange-50 hover:to-white"
+                        >
+                          <h3 className="text-sm font-medium text-slate-500">{stat.label}</h3>
+                          <p className="mt-1 text-2xl font-bold text-slate-800">
+                            {stat.value}
+                          </p>
+                          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-orange-200 to-amber-200 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Additional Metrics */}
+                    <div className="space-y-3">
+                      <h3 className="font-medium text-slate-700 flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                        Additional Metrics
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: "Limited English", value: countyData ? `${countyData.eng_less_than_very_well_pct}%` : "N/A" },
+                          { label: "Social Vulnerability", value: countyData ? countyData.svi.toFixed(2) : "N/A" }
+                        ].map((metric, index) => (
+                          <div 
+                            key={index}
+                            className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-slate-50 to-white p-3 shadow-sm transition-all duration-300 hover:shadow-md hover:from-orange-50 hover:to-white"
+                          >
+                            <h3 className="text-sm font-medium text-slate-500">{metric.label}</h3>
+                            <p className="mt-1 text-lg font-semibold text-slate-800">
+                              {metric.value}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            <style jsx global>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+              
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
           </TabsContent>
 
           <TabsContent 
