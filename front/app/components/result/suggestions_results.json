@@ -1,55 +1,55 @@
 {
     "Yolo": [
-        "Establish multilingual emergency alerts",
-        "Boost broadband infrastructure",
-        "Expand youth fire safety education",
-        "Fund low-income outreach programs",
-        "Enhance senior citizen evacuation plans"
+        ["Establish multilingual emergency alerts", "https://www.fcc.gov/multilingual-wireless-emergency-alerts"],
+        ["Boost broadband infrastructure", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Expand youth fire safety education", "https://sparkyschoolhouse.org/"],
+        ["Fund low-income outreach programs", "https://www.csd.ca.gov/Pages/CSBGProgram.aspx"],
+        ["Enhance senior citizen evacuation plans", "https://www.redcross.org/get-help/how-to-prepare-for-emergencies/older-adults.html"]
     ],
     "Riverside": [
-        "Increase broadband access",
-        "Fund elderly support services",
-        "Expand youth disaster education",
-        "Increase Spanish language resources",
-        "Boost healthcare accessibility",
-        "Enhance poverty alleviation programs",
-        "Incentivize larger household disaster preparedness",
-        "Promote insurance coverage"
+        ["Increase broadband access", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Fund elderly support services", "https://aging.ca.gov/Programs_and_Services/"],
+        ["Expand youth disaster education", "https://www.fema.gov/emergency-managers/individuals-communities/youth"],
+        ["Increase Spanish language resources", "https://rems.ed.gov/docs/SpanishLanguageResourceList_English_508C.pdf"],
+        ["Boost healthcare accessibility", "https://healthadministrationdegree.usc.edu/blog/how-to-improve-access-to-health-care"],
+        ["Enhance poverty alleviation programs", "https://www.csd.ca.gov/Pages/CSBGProgram.aspx"],
+        ["Incentivize larger household disaster preparedness", "https://www.fema.gov/assistance/individual/program"],
+        ["Promote insurance coverage", "https://www.sagefrog.com/blog/marketing-mix-survey/5-effective-marketing-strategies-for-insurance-companies/"]
     ],
     "Kern": [
-        "Focus more on community outreach of programs",
-        "Expand senior citizen healthcare services",
-        "Increase youth fire safety education",
-        "Improve broadband infrastructure",
-        "Launch Social Vulnerability Index improvement plan"
+        ["Focus more on community outreach of programs", "https://thesocialchangeagency.org/blog/community-outreach-done-right-tips-for-charities-and-funders/"],
+        ["Expand senior citizen healthcare services", "https://www.dhcs.ca.gov/services/medi-cal/eligibility/Pages/OlderAdultExpansion.aspx"],
+        ["Increase youth fire safety education", "https://www.usfa.fema.gov/prevention/fire-officials/public-educators/"],
+        ["Improve broadband infrastructure", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Launch Social Vulnerability Index improvement plan", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"]
     ],
     "Shasta": [
-        "Expand youth fire safety education",
-        "Improve broadband connectivity",
-        "Boost healthcare coverage",
-        "Invest in poverty alleviation programs",
-        "Enhance multilingual emergency services",
-        "Establish SVI-based disaster response plan",
-        "Improve Hispanic community outreach",
-        "Increase support for Native American communities"
+        ["Expand youth fire safety education", "https://sparkyschoolhouse.org/"],
+        ["Improve broadband connectivity", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Boost healthcare coverage", "https://healthadministrationdegree.usc.edu/blog/how-to-improve-access-to-health-care"],
+        ["Invest in poverty alleviation programs", "https://www.csd.ca.gov/Pages/CSBGProgram.aspx"],
+        ["Enhance multilingual emergency services", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"],
+        ["Establish SVI-based disaster response plan", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"],
+        ["Improve Hispanic community outreach", "https://rems.ed.gov/docs/SpanishLanguageResourceList_English_508C.pdf"],
+        ["Increase support for Native American communities", "https://www.usda.gov/sustainability/infrastructure/broadband"]
     ],
     "Los Angeles": [
-        "Boost elderly disaster preparedness education",
-        "Increase funding for child emergency services",
-        "Enhance broadband infrastructure in vulnerable areas",
-        "Improve public transportation for evacuation",
-        "Fund health insurance enrollment outreach",
-        "Enhance language services for Hispanic community",
-        "Address social vulnerability in disaster planning",
-        "Ensure Asian community disaster response inclusivity"
+        ["Boost elderly disaster preparedness education", "https://www.redcross.org/get-help/how-to-prepare-for-emergencies/older-adults.html"],
+        ["Increase funding for child emergency services", "https://www.fema.gov/emergency-managers/individuals-communities/youth"],
+        ["Enhance broadband infrastructure in vulnerable areas", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Improve public transportation for evacuation", "https://www.transit.dot.gov/emergency-preparedness"],
+        ["Fund health insurance enrollment outreach", "https://www.coveredca.com/"],
+        ["Enhance language services for Hispanic community", "https://rems.ed.gov/docs/SpanishLanguageResourceList_English_508C.pdf"],
+        ["Address social vulnerability in disaster planning", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"],
+        ["Ensure Asian community disaster response inclusivity", "https://www.ready.gov/asia-american-pacific-islander"]
     ],
     "Monterey": [
-        "Establish youth-oriented disaster education",
-        "Improve broadband infrastructure",
-        "Increase public transportation evacuation options",
-        "Implement poverty alleviation initiatives",
-        "Enhance Asian community outreach",
-        "Prioritize Hispanic community disaster response",
-        "Improve SVI through targeted programs"
+        ["Establish youth-oriented disaster education", "https://sparkyschoolhouse.org/"],
+        ["Improve broadband infrastructure", "https://www.usda.gov/sustainability/infrastructure/broadband/reconnect-loan-and-grant-program"],
+        ["Increase public transportation evacuation options", "https://www.transit.dot.gov/emergency-preparedness"],
+        ["Implement poverty alleviation initiatives", "https://www.csd.ca.gov/Pages/CSBGProgram.aspx"],
+        ["Enhance Asian community outreach", "https://www.ready.gov/asia-american-pacific-islander"],
+        ["Prioritize Hispanic community disaster response", "https://rems.ed.gov/docs/SpanishLanguageResourceList_English_508C.pdf"],
+        ["Improve SVI through targeted programs", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"]
     ]
 }

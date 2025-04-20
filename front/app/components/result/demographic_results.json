@@ -18,7 +18,8 @@
       "Black or African American": 2.7
     },
     "hispanic_pct": 32.2,
-    "svi": 0.7366
+    "svi": 0.7366,
+    "total_homeless": 655
   },
   "Riverside": {
     "total_households": 749976,
@@ -39,7 +40,8 @@
       "Some other race": 23.6
     },
     "hispanic_pct": 50.8,
-    "svi": 0.7667
+    "svi": 0.8199,
+    "total_homeless": 2811
   },
   "Kern": {
     "total_households": 277499,
@@ -60,7 +62,8 @@
       "Black or African American": 5.2
     },
     "hispanic_pct": 55.3,
-    "svi": 0.8432
+    "svi": 0.9685,
+    "total_homeless": 1330
   },
   "Shasta": {
     "total_households": 71107,
@@ -81,7 +84,8 @@
       "American Indian and Alaska Native": 1.8
     },
     "hispanic_pct": 11.0,
-    "svi": 0.7649
+    "svi": 0.7649,
+    "total_homeless": 806
   },
   "Los Angeles": {
     "total_households": 3363093,
@@ -102,7 +106,8 @@
       "Asian": 14.8
     },
     "hispanic_pct": 48.7,
-    "svi": 0.8629
+    "svi": 0.8629,
+    "total_homeless": 52442
   },
   "Monterey": {
     "total_households": 130973,
@@ -123,6 +128,7 @@
       "Asian": 5.9
     },
     "hispanic_pct": 59.9,
-    "svi": 0.8686
+    "svi": 0.8686,
+    "total_homeless": 2704
   }
 }

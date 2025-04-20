@@ -34,11 +34,11 @@ const getWeatherCondition = (temp: number, precip: number) => {
 
 // Default suggestions in case the county data is not available
 const defaultSuggestions = [
-  "Increase emergency response training",
-  "Enhance community outreach programs",
-  "Improve multilingual communication",
-  "Boost volunteer recruitment",
-  "Expand disaster preparedness education"
+  ["Increase emergency response training", "https://www.fema.gov/emergency-managers/individuals-communities/youth"],
+  ["Enhance community outreach programs", "https://thesocialchangeagency.org/blog/community-outreach-done-right-tips-for-charities-and-funders/"],
+  ["Improve multilingual communication", "https://www.fcc.gov/MultilingualAlerting_EAS-WEA"],
+  ["Boost volunteer recruitment", "https://www.redcross.org/volunteer/become-a-volunteer.html"],
+  ["Expand disaster preparedness education", "https://www.ready.gov/plan"]
 ]
 
 interface InfoSidebarProps {
@@ -570,7 +570,8 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                         { label: "Population", value: countyData?.total_pop.toLocaleString() },
                         { label: "Median Income", value: countyData ? `$${countyData.median_income.toLocaleString()}` : "N/A" },
                         { label: "Avg. Household Size", value: countyData ? `${countyData.avg_household_size} people` : "N/A" },
-                        { label: "Poverty Rate", value: countyData ? `${countyData.poverty_pct}%` : "N/A" }
+                        { label: "Poverty Rate", value: countyData ? `${countyData.poverty_pct}%` : "N/A" },
+                        { label: "Homeless Population", value: countyData ? countyData.total_homeless.toLocaleString() : "N/A" }
                       ].map((stat, index) => (
                         <div 
                           key={index}
@@ -778,7 +779,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                                     <Lightbulb className="h-5 w-5 text-orange-600" />
                                   </div>
                                   <div className="flex-1">
-                                    <p className="font-medium text-slate-800 text-lg mb-2">{suggestion}</p>
+                                    <p className="font-medium text-slate-800 text-lg mb-2">{suggestion[0]}</p>
                                     <div className="flex gap-3">
                                       <Button 
                                         variant="outline" 
@@ -791,6 +792,7 @@ export default function InfoSidebar({ selectedCity, visible = false }: InfoSideb
                                         variant="ghost" 
                                         size="sm" 
                                         className="h-8 px-4 hover:bg-slate-100 hover:text-slate-900 transition-colors duration-300"
+                                        onClick={() => window.open(suggestion[1], '_blank')}
                                       >
                                         Learn More
                                       </Button>
