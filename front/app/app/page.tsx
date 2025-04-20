@@ -4,6 +4,7 @@ import { useState } from 'react';
 import MapboxMap from '../components/MapboxMap';
 import InfoSidebar from '../components/InfoSidebar';
 import WelcomePage from '../components/WelcomePage';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState("Davis, CA");
@@ -14,16 +15,28 @@ export default function Home() {
   };
 
   return (
-    <>
-      {showWelcome && <WelcomePage onComplete={() => setShowWelcome(false)} />}
-      <main className="h-screen w-full relative">
-        <div className="absolute inset-0">
-          <MapboxMap onCitySelect={handleCitySelect} />
-        </div>
-        <div className="absolute right-0 top-0 h-full w-1/3">
-          <InfoSidebar selectedCity={selectedCity} />
-        </div>
-      </main>
-    </>
+    <div className="relative h-screen w-full overflow-hidden">
+      <AnimatePresence mode="wait">
+        {showWelcome ? (
+          <WelcomePage key="welcome" onComplete={() => setShowWelcome(false)} />
+        ) : (
+          <motion.div
+            key="main"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="h-full w-full"
+          >
+            <div className="absolute inset-0">
+              <MapboxMap onCitySelect={handleCitySelect} />
+            </div>
+            <div className="absolute right-0 top-0 h-full">
+              <InfoSidebar selectedCity={selectedCity} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

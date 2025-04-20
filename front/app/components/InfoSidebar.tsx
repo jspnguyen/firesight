@@ -70,31 +70,7 @@ const cityData = {
       humidity: "58%",
     },
   },
-} as const;
-
-const citySuggestions = {
-  "Davis, CA": [
-    "Need additional Chinese translators for emergency communications",
-    "Need student volunteer coordinators",
-    "Need emergency response training for campus areas",
-    "Need bike evacuation route coordinators",
-    "Need community outreach for student housing areas",
-  ],
-  "San Jose, CA": [
-    "Need additional Vietnamese translators",
-    "Need tech industry emergency coordinators",
-    "Need volunteer firefighters",
-    "Need emergency response training in tech campuses",
-    "Need community outreach in diverse neighborhoods",
-  ],
-  "Los Angeles, CA": [
-    "Need additional Spanish translators",
-    "Need traffic evacuation coordinators",
-    "Need emergency response training in entertainment venues",
-    "Need wildfire preparedness coordinators",
-    "Need community outreach in dense urban areas",
-  ],
-} as const;
+}
 
 interface InfoSidebarProps {
   selectedCity: string;
@@ -104,45 +80,33 @@ export default function InfoSidebar({ selectedCity = "Davis, CA" }: InfoSidebarP
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const city = cityData[selectedCity as keyof typeof cityData]
 
-  // Default data for non-predefined cities
-  const defaultCityData = {
-    languages: [
-      { name: "Data not available", percentage: "-" }
+  const suggestions = {
+    "Davis, CA": [
+      "Need additional Chinese translators for emergency communications",
+      "Need student volunteer coordinators",
+      "Need emergency response training for campus areas",
+      "Need bike evacuation route coordinators",
+      "Need community outreach for student housing areas",
     ],
-    demographics: {
-      population: "Not available",
-      averageMedian: "Not available",
-      avgHouseholdAge: "Not available",
-      fireStationPersonnel: "Not available",
-    },
-    weather: {
-      temperature: "N/A",
-      condition: "Not available",
-      wind: "N/A",
-      direction: "N/A",
-      gust: "N/A",
-      humidity: "N/A",
-    },
+    "San Jose, CA": [
+      "Need additional Vietnamese translators",
+      "Need tech industry emergency coordinators",
+      "Need volunteer firefighters",
+      "Need emergency response training in tech campuses",
+      "Need community outreach in diverse neighborhoods",
+    ],
+    "Los Angeles, CA": [
+      "Need additional Spanish translators",
+      "Need traffic evacuation coordinators",
+      "Need emergency response training in entertainment venues",
+      "Need wildfire preparedness coordinators",
+      "Need community outreach in dense urban areas",
+    ],
   }
-
-  // Use default data if the city is not in our predefined list
-  const cityInfo = city || defaultCityData
-  const cityName = selectedCity || "Selected Location"
-
-  // Default suggestions for non-predefined cities
-  const defaultSuggestions = [
-    "Need demographic data collection",
-    "Need local emergency response assessment",
-    "Need community outreach programs",
-    "Need infrastructure evaluation",
-    "Need resource allocation analysis",
-  ]
-
-  const suggestions = citySuggestions[selectedCity as keyof typeof citySuggestions] || defaultSuggestions
 
   return (
     <div
-      className={`absolute right-0 top-0 z-20 h-full w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-in-out md:relative ${
+      className={`fixed right-0 top-0 z-20 h-auto min-h-screen w-full max-w-md transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
         sidebarOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -155,8 +119,8 @@ export default function InfoSidebar({ selectedCity = "Davis, CA" }: InfoSidebarP
         <ChevronRight className={`h-5 w-5 transition-transform ${sidebarOpen ? "rotate-180" : ""}`} />
       </Button>
 
-      <Tabs defaultValue="info" className="h-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="info" className="flex h-full min-h-screen flex-col">
+        <TabsList className="sticky top-0 z-10 grid w-full grid-cols-3 bg-white">
           <TabsTrigger value="info" className="flex items-center gap-1">
             <Info className="h-4 w-4" />
             <span>Info</span>
@@ -171,125 +135,127 @@ export default function InfoSidebar({ selectedCity = "Davis, CA" }: InfoSidebarP
           </TabsTrigger>
         </TabsList>
 
-        <div className="h-[calc(100%-40px)] overflow-y-auto p-4">
-          <TabsContent value="info" className="mt-0 h-full">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Info className="h-5 w-5 text-slate-600" />
-                  {cityName} Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-slate-700">Languages</h3>
-                    <ul className="mt-1 space-y-1 pl-5 text-sm">
-                      {cityInfo.languages.map((lang, index) => (
-                        <li key={index} className="flex items-center justify-between">
-                          <span>#{index + 1}: {lang.name}</span>
-                          <span className="font-medium text-slate-700">{lang.percentage}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="h-full p-4">
+            <TabsContent value="info" className="mt-0 h-full">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Info className="h-5 w-5 text-slate-600" />
+                    {selectedCity} Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-slate-700">Languages</h3>
+                      <ul className="mt-1 space-y-1 pl-5 text-sm">
+                        {city.languages.map((lang, index) => (
+                          <li key={index} className="flex items-center justify-between">
+                            <span>#{index + 1}: {lang.name}</span>
+                            <span className="font-medium text-slate-700">{lang.percentage}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Population</h3>
-                      <p className="font-medium text-slate-800">{cityInfo.demographics.population}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Average Median</h3>
-                      <p className="font-medium text-slate-800">{cityInfo.demographics.averageMedian}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Avg. Household Age</h3>
-                      <p className="font-medium text-slate-800">{cityInfo.demographics.avgHouseholdAge}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-medium text-slate-500">Fire Station Personnel</h3>
-                      <p className="font-medium text-slate-800">{cityInfo.demographics.fireStationPersonnel}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Population</h3>
+                        <p className="font-medium text-slate-800">{city.demographics.population}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Average Median</h3>
+                        <p className="font-medium text-slate-800">{city.demographics.averageMedian}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Avg. Household Age</h3>
+                        <p className="font-medium text-slate-800">{city.demographics.avgHouseholdAge}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500">Fire Station Personnel</h3>
+                        <p className="font-medium text-slate-800">{city.demographics.fireStationPersonnel}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          <TabsContent value="weather" className="mt-0 h-full">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Cloud className="h-5 w-5 text-slate-600" />
-                  Current Weather
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
-                    <div className="flex flex-col items-center">
-                      <Cloud className="h-12 w-12 text-slate-600" />
-                      <span className="mt-2 text-3xl font-bold">{cityInfo.weather.temperature}</span>
-                      <span className="text-sm text-slate-500">{cityInfo.weather.condition}</span>
+            <TabsContent value="weather" className="mt-0 h-full">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Cloud className="h-5 w-5 text-slate-600" />
+                    Current Weather
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 flex items-center justify-center rounded-lg bg-slate-50 p-4">
+                      <div className="flex flex-col items-center">
+                        <Cloud className="h-12 w-12 text-slate-600" />
+                        <span className="mt-2 text-3xl font-bold">{city.weather.temperature}</span>
+                        <span className="text-sm text-slate-500">{city.weather.condition}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Wind</h3>
+                      <p className="font-medium text-slate-800">{city.weather.wind}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Direction</h3>
+                      <p className="font-medium text-slate-800">{city.weather.direction}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Gust</h3>
+                      <p className="font-medium text-slate-800">{city.weather.gust}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
+                      <p className="font-medium text-slate-800">{city.weather.humidity}</p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Wind</h3>
-                    <p className="font-medium text-slate-800">{cityInfo.weather.wind}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Direction</h3>
-                    <p className="font-medium text-slate-800">{cityInfo.weather.direction}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Gust</h3>
-                    <p className="font-medium text-slate-800">{cityInfo.weather.gust}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-slate-500">Humidity</h3>
-                    <p className="font-medium text-slate-800">{cityInfo.weather.humidity}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="suggestions" className="mt-0 h-full">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Lightbulb className="h-5 w-5 text-slate-600" />
-                  Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {suggestions.map((suggestion, index) => (
-                    <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5 rounded-full bg-amber-100 p-1">
-                          <Lightbulb className="h-4 w-4 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-800">{suggestion}</p>
-                          <div className="mt-1 flex gap-2">
-                            <Button variant="outline" size="sm" className="h-7 text-xs">
-                              Volunteer
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-xs">
-                              Learn More
-                            </Button>
+            <TabsContent value="suggestions" className="mt-0 h-full">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Lightbulb className="h-5 w-5 text-slate-600" />
+                    Suggestions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {suggestions[selectedCity as keyof typeof suggestions].map((suggestion, index) => (
+                      <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 rounded-full bg-amber-100 p-1">
+                            <Lightbulb className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-800">{suggestion}</p>
+                            <div className="mt-1 flex gap-2">
+                              <Button variant="outline" size="sm" className="h-7 text-xs">
+                                Volunteer
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                Learn More
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
         </div>
       </Tabs>
     </div>
